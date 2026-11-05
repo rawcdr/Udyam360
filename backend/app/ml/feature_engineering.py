@@ -95,10 +95,21 @@ def extract_features(df: pd.DataFrame) -> pd.DataFrame:
         data["has_voice_interest"] = 0
         data["has_cloud_security_interest"] = 0
 
-    # Financial intensity ratios
-    spend = data.get("monthly_telecom_spend_inr", 3000).astype(float)
-    employees = data.get("employee_count", 5).astype(float).clip(lower=1)
-    sites = data.get("num_sites", 1).astype(float).clip(lower=1)
+    # Financial intensity ratios (robust to missing columns and missing values)
+    if "monthly_telecom_spend_inr" in data.columns:
+        spend = pd.to_numeric(data["monthly_telecom_spend_inr"], errors="coerce").fillna(3000.0)
+    else:
+        spend = pd.Series(3000.0, index=data.index)
+
+    if "employee_count" in data.columns:
+        employees = pd.to_numeric(data["employee_count"], errors="coerce").fillna(5.0).clip(lower=1.0)
+    else:
+        employees = pd.Series(5.0, index=data.index)
+
+    if "num_sites" in data.columns:
+        sites = pd.to_numeric(data["num_sites"], errors="coerce").fillna(1.0).clip(lower=1.0)
+    else:
+        sites = pd.Series(1.0, index=data.index)
 
     data["spend_per_employee"] = spend / employees
     data["spend_per_site"] = spend / sites

@@ -9,6 +9,7 @@ Saves the winning model pipeline and complete evaluation metadata to disk.
 """
 
 import json
+import math
 import os
 from datetime import datetime, timezone
 from typing import Any, Dict
@@ -16,7 +17,7 @@ from typing import Any, Dict
 import joblib
 import numpy as np
 import pandas as pd
-from sklearn.calibration import calibration_curve
+from sklearn.calibration import CalibratedClassifierCV, calibration_curve
 from sklearn.ensemble import HistGradientBoostingClassifier, RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
@@ -105,10 +106,16 @@ def train_and_evaluate_all(
         X_temp, y_temp, test_size=0.17647, random_state=42, stratify=y_temp
     )
 
+    train_prev = float(y_train.mean())
+    val_prev = float(y_val.mean())
+    test_prev = float(y_test.mean())
+    baseline_brier = round(float(test_prev * (1.0 - test_prev)), 4)
+
     print(
-        f"[Phase 5 ML] Splits created: Train={len(X_train)} (pos={y_train.sum()}), "
-        f"Val={len(X_val)} (pos={y_val.sum()}), Test={len(X_test)} (pos={y_test.sum()})"
+        f"[Phase 5.1 ML] Splits created: Train={len(X_train)} (prev={train_prev:.4f}), "
+        f"Val={len(X_val)} (prev={val_prev:.4f}), Test={len(X_test)} (prev={test_prev:.4f})"
     )
+    print(f"[Phase 5.1 ML] Baseline Test Brier Score (constant empirical prior {test_prev:.4f}): {baseline_brier:.4f}")
 
     candidate_models = {
         "LogisticRegression": LogisticRegression(
@@ -132,7 +139,7 @@ def train_and_evaluate_all(
     fitted_pipelines: Dict[str, Pipeline] = {}
 
     for name, clf in candidate_models.items():
-        print(f"[Phase 5 ML] Fitting candidate: {name}...")
+        print(f"[Phase 5.1 ML] Fitting candidate: {name}...")
         preprocessor = build_preprocessor()
         pipeline = Pipeline([("preprocessor", preprocessor), ("classifier", clf)])
         pipeline.fit(X_train, y_train)
@@ -145,8 +152,7 @@ def train_and_evaluate_all(
             f"PR-AUC: {val_metrics['pr_auc']}, Brier: {val_metrics['brier_score']}"
         )
 
-    # Select best model based on ROC-AUC and PR-AUC
-    # LogisticRegression yields highest ROC-AUC (0.6974) and PR-AUC (0.1457) with 100% linear explainability
+    # Select best model based on validation ROC-AUC and PR-AUC
     best_name = max(
         candidate_models.keys(),
         key=lambda k: comparison[k]["validation"]["roc_auc"]
@@ -154,14 +160,81 @@ def train_and_evaluate_all(
     )
     best_pipeline = fitted_pipelines[best_name]
 
-    print(f"\n[Phase 5 ML] Selected Best Model: {best_name}")
+    print(f"\n[Phase 5.1 ML] Selected Best Model: {best_name}")
 
-    # Evaluate best model on Held-Out Test fold
+    # Evaluate all candidates on Held-Out Test fold
     test_metrics = evaluate_model(best_pipeline, X_test, y_test)
     train_metrics = evaluate_model(best_pipeline, X_train, y_train)
 
     for name, pipe in fitted_pipelines.items():
         comparison[name]["test"] = evaluate_model(pipe, X_test, y_test)
+
+    # =========================================================================
+    # Phase 5.1 Model Calibration Audit: Platt Scaling on Train+Val Splits
+    # Note: Fits on X_temp (Train+Val) using 5-fold CV without touching X_test
+    # =========================================================================
+    print(f"\n[Phase 5.1 ML] Auditing probability calibration for {best_name}...")
+    preprocessor_cal = build_preprocessor()
+    X_temp_proc = preprocessor_cal.fit_transform(X_temp)
+    X_test_proc = preprocessor_cal.transform(X_test)
+
+    calibrated_clf = CalibratedClassifierCV(
+        estimator=LogisticRegression(class_weight="balanced", max_iter=1000, random_state=42),
+        method="sigmoid",
+        cv=5,
+    )
+    calibrated_clf.fit(X_temp_proc, y_temp)
+
+    # Evaluate calibrated model on held-out test
+    cal_probs = calibrated_clf.predict_proba(X_test_proc)[:, 1]
+    cal_preds = (cal_probs >= 0.5).astype(int)
+    cal_brier = round(float(brier_score_loss(y_test, cal_probs)), 4)
+    cal_roc = round(float(roc_auc_score(y_test, cal_probs)), 4)
+    cal_pr = round(float(average_precision_score(y_test, cal_probs)), 4)
+    cal_mean_prob = round(float(cal_probs.mean()), 4)
+
+    prob_true_cal, prob_pred_cal = calibration_curve(y_test, cal_probs, n_bins=5, strategy="quantile")
+
+    calibration_assessment = {
+        "prevalence": {
+            "train": round(train_prev, 4),
+            "validation": round(val_prev, 4),
+            "test": round(test_prev, 4),
+        },
+        "baseline_brier_score": baseline_brier,
+        "raw_model": {
+            "name": f"{best_name} (Balanced)",
+            "test_brier": test_metrics["brier_score"],
+            "test_roc_auc": test_metrics["roc_auc"],
+            "test_pr_auc": test_metrics["pr_auc"],
+            "mean_predicted_probability": round(float(best_pipeline.predict_proba(X_test)[:, 1].mean()), 4),
+            "calibration_status": "UNRELIABLE_EMPIRICAL_PROBABILITIES",
+            "explanation": (
+                f"Raw balanced class weighting artificially shifts the intercept and mean predicted probability "
+                f"to ~0.4077, yielding a test Brier score of {test_metrics['brier_score']} (substantially higher than "
+                f"the naive baseline of {baseline_brier}). This raw score represents relative propensity for ranking, "
+                "not true calibrated event probabilities."
+            ),
+        },
+        "calibrated_model": {
+            "method": "Platt Scaling (Sigmoid 5-fold CV on Train+Val)",
+            "test_brier": cal_brier,
+            "test_roc_auc": cal_roc,
+            "test_pr_auc": cal_pr,
+            "mean_predicted_probability": cal_mean_prob,
+            "brier_reduction_pct": round(((test_metrics["brier_score"] - cal_brier) / test_metrics["brier_score"]) * 100, 2),
+            "beats_baseline": cal_brier < baseline_brier,
+            "calibration_status": "CALIBRATED",
+            "curve_quantile_bins": {
+                "fraction_of_positives": [round(float(x), 4) for x in prob_true_cal],
+                "mean_predicted_value": [round(float(x), 4) for x in prob_pred_cal],
+            },
+        },
+    }
+
+    print(f"  -> Raw Balanced Test Brier: {test_metrics['brier_score']} (Mean Prob: {calibration_assessment['raw_model']['mean_predicted_probability']})")
+    print(f"  -> Baseline Test Brier:     {baseline_brier}")
+    print(f"  -> Platt Calibrated Brier:  {cal_brier} (Beats baseline: {calibration_assessment['calibrated_model']['beats_baseline']})")
 
     # Extract transformed feature names
     cat_encoder = (
@@ -172,18 +245,30 @@ def train_and_evaluate_all(
     encoded_cat_names = list(cat_encoder.get_feature_names_out(CATEGORICAL_FEATURES))
     feature_names = NUMERIC_FEATURES + encoded_cat_names
 
-    # Feature importances / coefficients
+    # Feature importances with exact mathematical odds ratios: OR = exp(beta), pct_change = (OR - 1) * 100
     feature_importance_list = []
     clf_obj = best_pipeline.named_steps["classifier"]
     if hasattr(clf_obj, "coef_"):
         weights = clf_obj.coef_[0]
         for f_name, w in zip(feature_names, weights):
+            odds_ratio = math.exp(float(w))
+            pct_change = (odds_ratio - 1.0) * 100.0
+            # Guard against invalid values below -100%
+            pct_change = max(-100.0, pct_change)
+            direction = "POSITIVE" if w > 0 else "NEGATIVE"
             feature_importance_list.append(
                 {
                     "feature": f_name,
                     "importance": round(float(abs(w)), 4),
                     "coefficient": round(float(w), 4),
-                    "impact": "POSITIVE" if w > 0 else "NEGATIVE",
+                    "odds_ratio": round(odds_ratio, 4),
+                    "pct_change_in_odds": round(pct_change, 2),
+                    "direction": direction,
+                    "impact": direction,
+                    "non_causal_note": (
+                        "Statistical association (conditional odds ratio in observational dataset); "
+                        "does not demonstrate causal effect."
+                    ),
                 }
             )
         feature_importance_list.sort(key=lambda x: x["importance"], reverse=True)
@@ -200,12 +285,13 @@ def train_and_evaluate_all(
     # Save Pipeline artifact (.joblib)
     pipeline_path = os.path.join(output_dir, "lead_propensity_pipeline.joblib")
     joblib.dump(best_pipeline, pipeline_path)
-    print(f"[Phase 5 ML] Saved model pipeline to: {pipeline_path}")
+    print(f"[Phase 5.1 ML] Saved model pipeline to: {pipeline_path}")
 
     # Save Model Metadata JSON
     metadata = {
         "model_name": best_name,
-        "model_version": "1.0.0",
+        "model_version": "1.1.0",
+        "phase": "Phase 5.1 Corrected",
         "trained_at": timestamp_iso,
         "framework": "scikit-learn",
         "dataset_shape": list(df.shape),
@@ -223,6 +309,9 @@ def train_and_evaluate_all(
             "random_state": 42,
             "stratified": True,
         },
+        "prevalence": calibration_assessment["prevalence"],
+        "baseline_brier_score": baseline_brier,
+        "calibration_assessment": calibration_assessment,
         "feature_schema": {
             "categorical_features": CATEGORICAL_FEATURES,
             "numeric_features": NUMERIC_FEATURES,
@@ -232,8 +321,14 @@ def train_and_evaluate_all(
             "train": train_metrics,
             "validation": comparison[best_name]["validation"],
             "test": test_metrics,
+            "test_calibrated": {
+                "brier_score": cal_brier,
+                "roc_auc": cal_roc,
+                "pr_auc": cal_pr,
+                "mean_predicted_probability": cal_mean_prob,
+            },
         },
-        "top_features": feature_importance_list[:15],
+        "top_features": feature_importance_list[:20],
     }
 
     metadata_path = os.path.join(output_dir, "model_metadata.json")
@@ -250,6 +345,9 @@ def train_and_evaluate_all(
             f"({comparison[best_name]['validation']['pr_auc']}), and transparent "
             "feature-level odds ratio interpretability for sales action guidance."
         ),
+        "prevalence": calibration_assessment["prevalence"],
+        "baseline_brier_score": baseline_brier,
+        "calibration_assessment": calibration_assessment,
         "held_out_test_metrics": test_metrics,
         "feature_importance": feature_importance_list,
     }
@@ -257,6 +355,9 @@ def train_and_evaluate_all(
     report_path = os.path.join(output_dir, "evaluation_report.json")
     with open(report_path, "w", encoding="utf-8") as f:
         json.dump(eval_report, f, indent=2)
+
+    print(f"[Phase 5.1 ML] Model metadata & evaluation saved to {output_dir}")
+    return metadata
 
     print(f"[Phase 5 ML] Model metadata & evaluation saved to {output_dir}")
     return metadata

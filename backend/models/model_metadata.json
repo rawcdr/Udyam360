@@ -1,7 +1,8 @@
 {
   "model_name": "LogisticRegression",
-  "model_version": "1.0.0",
-  "trained_at": "2026-11-05T18:42:25.154401+00:00",
+  "model_version": "1.1.0",
+  "phase": "Phase 5.1 Corrected",
+  "trained_at": "2026-11-05T19:46:10.975480+00:00",
   "framework": "scikit-learn",
   "dataset_shape": [
     5000,
@@ -20,6 +21,55 @@
     "test_size": 750,
     "random_state": 42,
     "stratified": true
+  },
+  "prevalence": {
+    "train": 0.0737,
+    "validation": 0.0733,
+    "test": 0.0733
+  },
+  "baseline_brier_score": 0.068,
+  "calibration_assessment": {
+    "prevalence": {
+      "train": 0.0737,
+      "validation": 0.0733,
+      "test": 0.0733
+    },
+    "baseline_brier_score": 0.068,
+    "raw_model": {
+      "name": "LogisticRegression (Balanced)",
+      "test_brier": 0.2136,
+      "test_roc_auc": 0.6692,
+      "test_pr_auc": 0.1327,
+      "mean_predicted_probability": 0.4047,
+      "calibration_status": "UNRELIABLE_EMPIRICAL_PROBABILITIES",
+      "explanation": "Raw balanced class weighting artificially shifts the intercept and mean predicted probability to ~0.4077, yielding a test Brier score of 0.2136 (substantially higher than the naive baseline of 0.068). This raw score represents relative propensity for ranking, not true calibrated event probabilities."
+    },
+    "calibrated_model": {
+      "method": "Platt Scaling (Sigmoid 5-fold CV on Train+Val)",
+      "test_brier": 0.0666,
+      "test_roc_auc": 0.6662,
+      "test_pr_auc": 0.1292,
+      "mean_predicted_probability": 0.074,
+      "brier_reduction_pct": 68.82,
+      "beats_baseline": true,
+      "calibration_status": "CALIBRATED",
+      "curve_quantile_bins": {
+        "fraction_of_positives": [
+          0.0267,
+          0.06,
+          0.04,
+          0.0933,
+          0.1467
+        ],
+        "mean_predicted_value": [
+          0.0311,
+          0.0494,
+          0.0665,
+          0.0894,
+          0.1336
+        ]
+      }
+    }
   },
   "feature_schema": {
     "categorical_features": [
@@ -154,6 +204,12 @@
           0.8547
         ]
       }
+    },
+    "test_calibrated": {
+      "brier_score": 0.0666,
+      "roc_auc": 0.6662,
+      "pr_auc": 0.1292,
+      "mean_predicted_probability": 0.074
     }
   },
   "top_features": [
@@ -161,91 +217,201 @@
       "feature": "lead_source_WhatsApp campaign",
       "importance": 1.2578,
       "coefficient": -1.2578,
-      "impact": "NEGATIVE"
+      "odds_ratio": 0.2843,
+      "pct_change_in_odds": -71.57,
+      "direction": "NEGATIVE",
+      "impact": "NEGATIVE",
+      "non_causal_note": "Statistical association (conditional odds ratio in observational dataset); does not demonstrate causal effect."
     },
     {
       "feature": "preferred_language_Punjabi",
       "importance": 1.0006,
       "coefficient": -1.0006,
-      "impact": "NEGATIVE"
+      "odds_ratio": 0.3677,
+      "pct_change_in_odds": -63.23,
+      "direction": "NEGATIVE",
+      "impact": "NEGATIVE",
+      "non_causal_note": "Statistical association (conditional odds ratio in observational dataset); does not demonstrate causal effect."
     },
     {
       "feature": "lead_source_Referral",
       "importance": 0.9774,
       "coefficient": 0.9774,
-      "impact": "POSITIVE"
+      "odds_ratio": 2.6575,
+      "pct_change_in_odds": 165.75,
+      "direction": "POSITIVE",
+      "impact": "POSITIVE",
+      "non_causal_note": "Statistical association (conditional odds ratio in observational dataset); does not demonstrate causal effect."
     },
     {
       "feature": "has_gstin_N",
       "importance": 0.9029,
       "coefficient": -0.9029,
-      "impact": "NEGATIVE"
+      "odds_ratio": 0.4054,
+      "pct_change_in_odds": -59.46,
+      "direction": "NEGATIVE",
+      "impact": "NEGATIVE",
+      "non_causal_note": "Statistical association (conditional odds ratio in observational dataset); does not demonstrate causal effect."
     },
     {
       "feature": "business_type_Auto-parts unit",
       "importance": 0.7578,
       "coefficient": -0.7578,
-      "impact": "NEGATIVE"
+      "odds_ratio": 0.4687,
+      "pct_change_in_odds": -53.13,
+      "direction": "NEGATIVE",
+      "impact": "NEGATIVE",
+      "non_causal_note": "Statistical association (conditional odds ratio in observational dataset); does not demonstrate causal effect."
     },
     {
       "feature": "business_type_Real estate agency",
       "importance": 0.742,
       "coefficient": 0.742,
-      "impact": "POSITIVE"
+      "odds_ratio": 2.1002,
+      "pct_change_in_odds": 110.02,
+      "direction": "POSITIVE",
+      "impact": "POSITIVE",
+      "non_causal_note": "Statistical association (conditional odds ratio in observational dataset); does not demonstrate causal effect."
     },
     {
       "feature": "has_gstin_Y",
       "importance": 0.6787,
       "coefficient": 0.6787,
-      "impact": "POSITIVE"
+      "odds_ratio": 1.9712,
+      "pct_change_in_odds": 97.12,
+      "direction": "POSITIVE",
+      "impact": "POSITIVE",
+      "non_causal_note": "Statistical association (conditional odds ratio in observational dataset); does not demonstrate causal effect."
     },
     {
       "feature": "business_type_Restaurant chain",
       "importance": 0.6774,
       "coefficient": -0.6774,
-      "impact": "NEGATIVE"
+      "odds_ratio": 0.5079,
+      "pct_change_in_odds": -49.21,
+      "direction": "NEGATIVE",
+      "impact": "NEGATIVE",
+      "non_causal_note": "Statistical association (conditional odds ratio in observational dataset); does not demonstrate causal effect."
     },
     {
       "feature": "business_type_Mobile repair shop",
       "importance": 0.6456,
       "coefficient": 0.6456,
-      "impact": "POSITIVE"
+      "odds_ratio": 1.9072,
+      "pct_change_in_odds": 90.72,
+      "direction": "POSITIVE",
+      "impact": "POSITIVE",
+      "non_causal_note": "Statistical association (conditional odds ratio in observational dataset); does not demonstrate causal effect."
     },
     {
       "feature": "business_type_Pharmacy",
       "importance": 0.6295,
       "coefficient": -0.6295,
-      "impact": "NEGATIVE"
+      "odds_ratio": 0.5329,
+      "pct_change_in_odds": -46.71,
+      "direction": "NEGATIVE",
+      "impact": "NEGATIVE",
+      "non_causal_note": "Statistical association (conditional odds ratio in observational dataset); does not demonstrate causal effect."
     },
     {
       "feature": "business_type_Gym chain",
       "importance": 0.5803,
       "coefficient": 0.5803,
-      "impact": "POSITIVE"
+      "odds_ratio": 1.7866,
+      "pct_change_in_odds": 78.66,
+      "direction": "POSITIVE",
+      "impact": "POSITIVE",
+      "non_causal_note": "Statistical association (conditional odds ratio in observational dataset); does not demonstrate causal effect."
     },
     {
       "feature": "business_type_Electronics retail chain",
       "importance": 0.5325,
       "coefficient": -0.5325,
-      "impact": "NEGATIVE"
+      "odds_ratio": 0.5871,
+      "pct_change_in_odds": -41.29,
+      "direction": "NEGATIVE",
+      "impact": "NEGATIVE",
+      "non_causal_note": "Statistical association (conditional odds ratio in observational dataset); does not demonstrate causal effect."
     },
     {
       "feature": "lead_source_Website form",
       "importance": 0.5266,
       "coefficient": -0.5266,
-      "impact": "NEGATIVE"
+      "odds_ratio": 0.5906,
+      "pct_change_in_odds": -40.94,
+      "direction": "NEGATIVE",
+      "impact": "NEGATIVE",
+      "non_causal_note": "Statistical association (conditional odds ratio in observational dataset); does not demonstrate causal effect."
     },
     {
       "feature": "city_Vadodara",
       "importance": 0.5177,
       "coefficient": -0.5177,
-      "impact": "NEGATIVE"
+      "odds_ratio": 0.5959,
+      "pct_change_in_odds": -40.41,
+      "direction": "NEGATIVE",
+      "impact": "NEGATIVE",
+      "non_causal_note": "Statistical association (conditional odds ratio in observational dataset); does not demonstrate causal effect."
     },
     {
       "feature": "business_type_Optician",
       "importance": 0.4848,
       "coefficient": -0.4848,
-      "impact": "NEGATIVE"
+      "odds_ratio": 0.6158,
+      "pct_change_in_odds": -38.42,
+      "direction": "NEGATIVE",
+      "impact": "NEGATIVE",
+      "non_causal_note": "Statistical association (conditional odds ratio in observational dataset); does not demonstrate causal effect."
+    },
+    {
+      "feature": "business_type_Plastic moulding unit",
+      "importance": 0.4632,
+      "coefficient": 0.4632,
+      "odds_ratio": 1.5892,
+      "pct_change_in_odds": 58.92,
+      "direction": "POSITIVE",
+      "impact": "POSITIVE",
+      "non_causal_note": "Statistical association (conditional odds ratio in observational dataset); does not demonstrate causal effect."
+    },
+    {
+      "feature": "business_type_Pharmacy chain",
+      "importance": 0.4523,
+      "coefficient": 0.4523,
+      "odds_ratio": 1.5719,
+      "pct_change_in_odds": 57.19,
+      "direction": "POSITIVE",
+      "impact": "POSITIVE",
+      "non_causal_note": "Statistical association (conditional odds ratio in observational dataset); does not demonstrate causal effect."
+    },
+    {
+      "feature": "preferred_language_Hindi",
+      "importance": 0.449,
+      "coefficient": 0.449,
+      "odds_ratio": 1.5667,
+      "pct_change_in_odds": 56.67,
+      "direction": "POSITIVE",
+      "impact": "POSITIVE",
+      "non_causal_note": "Statistical association (conditional odds ratio in observational dataset); does not demonstrate causal effect."
+    },
+    {
+      "feature": "business_type_Bakery chain",
+      "importance": 0.4227,
+      "coefficient": 0.4227,
+      "odds_ratio": 1.526,
+      "pct_change_in_odds": 52.6,
+      "direction": "POSITIVE",
+      "impact": "POSITIVE",
+      "non_causal_note": "Statistical association (conditional odds ratio in observational dataset); does not demonstrate causal effect."
+    },
+    {
+      "feature": "current_provider_Local ISP",
+      "importance": 0.4216,
+      "coefficient": -0.4216,
+      "odds_ratio": 0.656,
+      "pct_change_in_odds": -34.4,
+      "direction": "NEGATIVE",
+      "impact": "NEGATIVE",
+      "non_causal_note": "Statistical association (conditional odds ratio in observational dataset); does not demonstrate causal effect."
     }
   ]
 }

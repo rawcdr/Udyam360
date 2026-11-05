@@ -14,56 +14,84 @@ from app.ml.feature_engineering import CATEGORICAL_FEATURES, NUMERIC_FEATURES, e
 # Friendly business glossary for raw feature keys
 FEATURE_DESCRIPTIONS: Dict[str, Tuple[str, str]] = {
     "lead_source_Referral": (
-        "Referred by existing partner/customer (+98% conversion odds)",
+        "Referred by existing partner/customer (+166% conversion odds, OR 2.66)",
         "Not a referral lead",
     ),
     "lead_source_Inbound call": (
-        "High-intent inbound inquiry (+26% conversion odds)",
+        "High-intent inbound phone inquiry (+32% conversion odds, OR 1.32)",
         "Outbound / passive lead origin",
     ),
     "lead_source_Channel partner": (
-        "Enterprise channel partner source",
+        "Enterprise channel partner source (+31% conversion odds, OR 1.31)",
         "Direct self-sourced lead",
     ),
     "lead_source_Field sales": (
-        "Direct field sales engagement",
+        "Direct field sales engagement (+4% conversion odds, OR 1.04)",
         "Non-field lead channel",
     ),
     "lead_source_Website form": (
-        "Standard website inbound webform",
-        "Low-converting website inquiry (-59% conversion odds)",
+        "Standard website inbound webform (-41% conversion odds, OR 0.59)",
+        "Non-webform origin",
     ),
     "lead_source_WhatsApp campaign": (
-        "Low-conversion WhatsApp campaign origin (-101% conversion odds)",
+        "Low-conversion WhatsApp campaign origin (-72% conversion odds, OR 0.28)",
         "Non-campaign channel",
     ),
     "has_gstin_Y": (
-        "Verified GSTIN registration declared (+61% conversion odds)",
+        "Verified GSTIN registration declared (+97% conversion odds, OR 1.97)",
         "Unregistered business entity",
     ),
     "has_gstin_N": (
-        "Exempt / non-registered entity",
-        "Lacks GSTIN registration (-77% conversion odds)",
+        "Exempt / non-registered entity (-59% conversion odds, OR 0.41)",
+        "Lacks GSTIN registration",
     ),
     "has_udyam_Y": (
-        "Formal Udyam MSME certification (+15% conversion odds)",
+        "Formal Udyam MSME certification (+3% conversion odds, OR 1.03)",
         "No Udyam certification",
     ),
-    "segment_Small manufacturers": (
-        "High-ARPU small manufacturing sector (+54% conversion odds)",
-        "Non-manufacturing vertical",
+    "has_udyam_N": (
+        "No Udyam certificate on record (-22% conversion odds, OR 0.78)",
+        "Has Udyam certification",
     ),
     "segment_Professional offices": (
-        "High-LTV professional office vertical (+32% conversion odds)",
+        "High-LTV professional office vertical (+27% conversion odds, OR 1.27)",
         "Non-office segment",
     ),
     "segment_Small multi-site businesses": (
-        "Multi-branch footprint requiring multi-CPE networking",
+        "Multi-branch footprint requiring multi-CPE networking (+8% conversion odds, OR 1.08)",
         "Single branch entity",
     ),
+    "segment_Small manufacturers": (
+        "Small manufacturing segment (-15% conversion odds, OR 0.85)",
+        "Non-manufacturing vertical",
+    ),
     "segment_Micro retail & services": (
-        "Micro retail archetype (historically higher price sensitivity)",
-        "Micro retail segment (-73% conversion odds)",
+        "Micro retail archetype (-32% conversion odds, OR 0.68)",
+        "Non-micro-retail vertical",
+    ),
+    "preferred_language_Punjabi": (
+        "Vernacular Punjabi language preference (-63% conversion odds, OR 0.37)",
+        "Standard collateral language",
+    ),
+    "business_type_Real estate agency": (
+        "High-velocity real estate agency vertical (+110% conversion odds, OR 2.10)",
+        "Non-real-estate vertical",
+    ),
+    "business_type_Mobile repair shop": (
+        "High digital adoption mobile repair vertical (+91% conversion odds, OR 1.91)",
+        "Non-repair vertical",
+    ),
+    "business_type_Auto-parts unit": (
+        "Traditional auto-parts industrial vertical (-53% conversion odds, OR 0.47)",
+        "Non-auto-parts vertical",
+    ),
+    "business_type_Restaurant chain": (
+        "Multi-outlet restaurant dining vertical (-49% conversion odds, OR 0.51)",
+        "Non-restaurant vertical",
+    ),
+    "business_type_Pharmacy": (
+        "Neighborhood pharmacy retail vertical (-47% conversion odds, OR 0.53)",
+        "Non-pharmacy vertical",
     ),
     "contact_role_Owner": (
         "Primary decision-maker (Owner) directly engaged",
@@ -74,11 +102,11 @@ FEATURE_DESCRIPTIONS: Dict[str, Tuple[str, str]] = {
         "Non-partner contact point",
     ),
     "has_broadband_interest": (
-        "High-speed commercial broadband intent flagged",
-        "No high-speed broadband requirement declared",
+        "Commercial broadband intent flagged",
+        "No commercial broadband requirement declared",
     ),
     "has_cloud_security_interest": (
-        "Interest in high-value cloud backup or surveillance",
+        "Interest in cloud backup or surveillance",
         "Baseline connectivity-only interest",
     ),
 }
@@ -150,6 +178,7 @@ class ModelExplainer:
             "positive_factors": positive_factors,
             "negative_factors": negative_factors,
             "business_summary": summary,
+            "non_causal_note": "Model associations represent conditional odds ratios within this observational dataset, not causal effects.",
         }
 
     def _format_factor(self, feature_name: str, is_positive: bool) -> str:

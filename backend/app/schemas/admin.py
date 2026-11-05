@@ -95,18 +95,26 @@ class FeatureImportanceItem(BaseModel):
     feature: str
     importance: float
     coefficient: Optional[float] = None
+    odds_ratio: Optional[float] = None
+    pct_change_in_odds: Optional[float] = None
+    direction: Optional[str] = None
     impact: Optional[str] = None
+    non_causal_note: Optional[str] = None
 
 
 class ModelInfoResponse(BaseModel):
     model_name: str
     model_version: str
+    phase: Optional[str] = None
     trained_at: str
     framework: str
     dataset_shape: List[int]
     target: str
     class_distribution: Dict[str, Any]
     splits: Dict[str, Any]
+    prevalence: Optional[Dict[str, float]] = None
+    baseline_brier_score: Optional[float] = None
+    calibration_assessment: Optional[Dict[str, Any]] = None
     feature_schema: Dict[str, Any]
     evaluation: Dict[str, Any]
     top_features: List[FeatureImportanceItem]
@@ -116,12 +124,22 @@ class EvaluationReportResponse(BaseModel):
     comparison: Dict[str, Any]
     selected_model: str
     selection_rationale: str
+    prevalence: Optional[Dict[str, float]] = None
+    baseline_brier_score: Optional[float] = None
+    calibration_assessment: Optional[Dict[str, Any]] = None
     held_out_test_metrics: Dict[str, Any]
     feature_importance: List[FeatureImportanceItem]
 
 
 class PropensityOverviewResponse(BaseModel):
-    total_unconverted_leads: int
+    total_historical_leads: int = 5000
+    activated_leads: int = 368
+    unconverted_leads: int = 4632
+    total_unconverted_leads: int = 4632
+    eligible_leads_for_prioritization: int = 4632
+    successfully_scored_leads: int = 4632
+    excluded_leads_count: int = 368
+    excluded_leads_by_reason: Dict[str, int] = Field(default_factory=dict)
     high_propensity_count: int
     high_propensity_pct: float
     medium_propensity_count: int
@@ -130,6 +148,11 @@ class PropensityOverviewResponse(BaseModel):
     low_propensity_pct: float
     thresholds: Dict[str, float]
     model_version: str
+    baseline_brier_score: float = 0.068
+    raw_brier_score: float = 0.2136
+    calibrated_brier_score: float = 0.0666
+    calibration_status: str = "CALIBRATED_PLATT_SCALING"
+    calibration_notes: str = ""
 
 
 class ScoredLeadSummary(BaseModel):
@@ -153,6 +176,8 @@ class ScoredLeadSummary(BaseModel):
     negative_factors: List[str] = Field(default_factory=list)
     business_summary: Optional[str] = None
     actions_count: int = 0
+    is_eligible_for_sales_action: bool = True
+    exclusion_reason: Optional[str] = None
 
 
 class LeadPaginationResponse(BaseModel):

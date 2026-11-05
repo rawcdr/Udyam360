@@ -128,17 +128,133 @@ def test_ml_feature_importance():
 
 
 def test_ml_propensity_overview():
-    """Verify unconverted lead propensity bands."""
+    """Verify eligible unconverted lead propensity bands and calibration metrics."""
     response = client.get("/api/v1/admin/ml/propensity-overview", headers=ADMIN_HEADERS)
     assert response.status_code == 200
     data = response.json()
-    assert data["total_unconverted_leads"] == 4632
+    assert data["total_historical_leads"] == 5000
+    assert data["activated_leads"] == 368
+    assert data["unconverted_leads"] == 4632
+    assert data["eligible_leads_for_prioritization"] == 4632
+    assert data["successfully_scored_leads"] == 4632
+    assert data["excluded_leads_count"] == 368
+    assert data["excluded_leads_by_reason"]["ALREADY_ACTIVATED"] == 368
+
+    # Recalculated distribution strictly on 4,632 eligible leads
+    assert data["high_propensity_count"] == 569
+    assert data["medium_propensity_count"] == 1564
+    assert data["low_propensity_count"] == 2499
     assert (
         data["high_propensity_count"]
         + data["medium_propensity_count"]
         + data["low_propensity_count"]
         == 4632
     )
+
+    # Calibration audit checks
+    assert data["baseline_brier_score"] == 0.068
+    assert data["raw_brier_score"] == 0.2136
+    assert data["calibrated_brier_score"] == 0.0666
+    assert data["calibrated_brier_score"] < data["baseline_brier_score"]
+    assert "CALIBRATED" in data["calibration_status"]
+
+
+def test_activated_leads_excluded_from_actionable_list():
+    """Verify that already-activated leads CANNOT appear in the actionable prospect table."""
+    response = client.get("/api/v1/admin/ml/leads?page=1&page_size=100", headers=ADMIN_HEADERS)
+    assert response.status_code == 200
+    leads = response.json()["leads"]
+    assert len(leads) > 0
+    for lead in leads:
+        assert lead["stage_reached"] != "Activated"
+        assert lead["outcome"] != "Activated"
+        assert lead["is_eligible_for_sales_action"] is True
+        assert lead["exclusion_reason"] is None
+
+
+def test_eligible_stages_selection():
+    """Verify querying eligible stages and confirming Activated returns zero actionable leads."""
+    eligible_stages = ["Lead", "Contacted", "Needs assessed", "Quote accepted", "KYC complete"]
+    for stg in eligible_stages:
+        resp = client.get(f"/api/v1/admin/ml/leads?stage={stg}&page_size=5", headers=ADMIN_HEADERS)
+        assert resp.status_code == 200
+        for item in resp.json()["leads"]:
+            assert item["stage_reached"].lower() == stg.lower()
+
+    # Querying Activated in the actionable lead table must return zero
+    resp_act = client.get("/api/v1/admin/ml/leads?stage=Activated", headers=ADMIN_HEADERS)
+    assert resp_act.status_code == 200
+    assert resp_act.json()["total_count"] == 0
+    assert len(resp_act.json()["leads"]) == 0
+
+
+def test_missing_feature_handling():
+    """Verify inference pipeline handles missing prediction features without throwing or dropping."""
+    # Completely sparse/minimal dictionary missing almost all optional allowlist features
+    sparse_lead = {
+        "lead_id": "SPARSE_TEST_LEAD",
+        "segment": "Micro retail & services",
+    }
+    response = client.post(
+        "/api/v1/admin/ml/score",
+        json={"lead_dict": sparse_lead},
+        headers=ADMIN_HEADERS,
+    )
+    assert response.status_code == 200
+    res = response.json()
+    assert 0.0 <= res["propensity_score"] <= 100.0
+    assert res["propensity_band"] in ["HIGH", "MEDIUM", "LOW"]
+    assert len(res["positive_factors"]) >= 0
+
+
+def test_baseline_brier_and_calibration_evaluation():
+    """Verify prevalence calculations, baseline Brier, and candidate Briers."""
+    response = client.get("/api/v1/admin/ml/evaluation", headers=ADMIN_HEADERS)
+    assert response.status_code == 200
+    data = response.json()
+
+    # Prevalences
+    assert data["prevalence"]["train"] == pytest.approx(0.0737, abs=1e-3)
+    assert data["prevalence"]["test"] == pytest.approx(0.0733, abs=1e-3)
+
+    # Baseline test Brier score = p*(1-p)
+    assert data["baseline_brier_score"] == pytest.approx(0.0680, abs=1e-3)
+
+    # Calibration assessment
+    cal_info = data["calibration_assessment"]
+    assert cal_info["raw_model"]["test_brier"] == pytest.approx(0.2136, abs=1e-3)
+    assert cal_info["calibrated_model"]["test_brier"] == pytest.approx(0.0666, abs=1e-3)
+    assert cal_info["calibrated_model"]["beats_baseline"] is True
+
+
+def test_feature_odds_ratios_mathematical_validity():
+    """Verify that all feature odds ratios are exp(beta), pct_change is (OR - 1)*100, and >= -100%."""
+    import math
+
+    response = client.get("/api/v1/admin/ml/feature-importance", headers=ADMIN_HEADERS)
+    assert response.status_code == 200
+    features = response.json()
+    assert len(features) > 0
+
+    for item in features:
+        coef = item["coefficient"]
+        odds_ratio = item["odds_ratio"]
+        pct_change = item["pct_change_in_odds"]
+
+        # Check OR = exp(beta)
+        expected_or = math.exp(coef)
+        assert odds_ratio == pytest.approx(expected_or, rel=1e-2)
+
+        # Check pct_change = (OR - 1) * 100
+        expected_pct = (expected_or - 1.0) * 100.0
+        assert pct_change == pytest.approx(expected_pct, abs=0.1)
+
+        # Never describe a negative odds change below -100%
+        assert pct_change >= -100.0
+
+        # Check non-causal note presence
+        assert item["non_causal_note"] is not None
+        assert "causal" in item["non_causal_note"].lower()
 
 
 def test_ml_score_single_lead():

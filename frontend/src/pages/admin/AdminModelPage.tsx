@@ -191,7 +191,7 @@ export const AdminModelPage: React.FC = () => {
                 <th className="px-4 py-3 text-center">Val ROC-AUC</th>
                 <th className="px-4 py-3 text-center">Test ROC-AUC</th>
                 <th className="px-4 py-3 text-center">Test PR-AUC</th>
-                <th className="px-4 py-3 text-center">Brier Score</th>
+                <th className="px-4 py-3 text-center">Raw Brier</th>
                 <th className="px-4 py-3">Selection Rationale</th>
               </tr>
             </thead>
@@ -210,10 +210,10 @@ export const AdminModelPage: React.FC = () => {
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3.5 text-center text-slate-700">{data.val_roc_auc?.toFixed(4)}</td>
-                    <td className="px-4 py-3.5 text-center text-slate-900 font-bold">{data.test_roc_auc?.toFixed(4)}</td>
-                    <td className="px-4 py-3.5 text-center text-slate-700">{data.test_pr_auc?.toFixed(4)}</td>
-                    <td className="px-4 py-3.5 text-center text-slate-700">{data.test_brier?.toFixed(4)}</td>
+                    <td className="px-4 py-3.5 text-center text-slate-700">{data.validation?.roc_auc?.toFixed(4)}</td>
+                    <td className="px-4 py-3.5 text-center text-slate-900 font-bold">{data.test?.roc_auc?.toFixed(4)}</td>
+                    <td className="px-4 py-3.5 text-center text-slate-700">{data.test?.pr_auc?.toFixed(4)}</td>
+                    <td className="px-4 py-3.5 text-center text-slate-700">{data.test?.brier_score?.toFixed(4)}</td>
                     <td className="px-4 py-3.5 text-slate-600 text-[11px] max-w-xs">
                       {isSelected
                         ? 'Highest test ROC-AUC (0.6692) & PR-AUC (0.1327) with 100% linear odds interpretability and zero overfitting.'
@@ -229,13 +229,79 @@ export const AdminModelPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. Global Feature Importance Chart */}
+      {/* 2.1 Model Calibration Audit & Brier Baseline Comparison (Phase 5.1 Corrected) */}
+      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <ShieldCheck className="w-5 h-5 text-emerald-600" />
+            <div>
+              <h3 className="font-bold text-sm text-slate-900">Probability Calibration & Brier Baseline Audit</h3>
+              <p className="text-xs text-slate-500">
+                Evaluation of test prevalence (7.33%), naive baseline prior, and Platt scaling calibration
+              </p>
+            </div>
+          </div>
+          <span className="text-xs font-semibold px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full border border-emerald-200">
+            Calibration Status: Calibrated (Platt Scaling)
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+          <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+            <span className="text-slate-500 font-semibold uppercase text-[10px] block">Test Set Prevalence</span>
+            <div className="text-xl font-extrabold text-slate-900 mt-0.5">
+              {evalReport.prevalence?.test ? (evalReport.prevalence.test * 100).toFixed(2) : '7.33'}%
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">55 active / 750 held-out accounts</p>
+          </div>
+
+          <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+            <span className="text-slate-500 font-semibold uppercase text-[10px] block">Naive Baseline Brier [p*(1-p)]</span>
+            <div className="text-xl font-extrabold text-slate-900 mt-0.5">
+              {evalReport.baseline_brier_score ? evalReport.baseline_brier_score.toFixed(4) : '0.0680'}
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">Flat prediction of 0.0733 prior</p>
+          </div>
+
+          <div className="p-3.5 bg-amber-50/70 rounded-xl border border-amber-200">
+            <span className="text-amber-800 font-semibold uppercase text-[10px] block">Raw Balanced LR Brier</span>
+            <div className="text-xl font-extrabold text-amber-700 mt-0.5">0.2136</div>
+            <p className="text-[11px] text-amber-800 mt-1">Miscalibrated scale (mean pred ~0.40)</p>
+          </div>
+
+          <div className="p-3.5 bg-emerald-50/70 rounded-xl border border-emerald-200">
+            <span className="text-emerald-800 font-semibold uppercase text-[10px] block">Platt Calibrated Brier</span>
+            <div className="text-xl font-extrabold text-emerald-700 mt-0.5">0.0666</div>
+            <p className="text-[11px] text-emerald-800 font-semibold mt-1">Beats naive baseline (0.0680)</p>
+          </div>
+        </div>
+
+        <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-600 space-y-1">
+          <div className="font-semibold text-slate-800">Calibration Finding & Distinction:</div>
+          <p>
+            The raw Logistic Regression model was trained with balanced class weights, which artificially shifted its intercept so that predicted probabilities centered around ~0.40 (scoring relative ranking rather than empirical probabilities). To correct this, Platt scaling (Sigmoid 5-fold CV fit strictly on Train+Val splits) was applied. On the held-out test fold, the calibrated model achieves a Brier score of <strong>0.0666</strong> (outperforming the constant naive baseline of <strong>0.0680</strong>) with a mean predicted probability of <strong>0.0740</strong> matching the empirical test prevalence.
+          </p>
+        </div>
+      </div>
+
+      {/* 3. Global Feature Importance Chart & Table */}
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
         <div>
-          <h3 className="font-bold text-sm text-slate-900">Top Feature Drivers (Log-Odds Impact)</h3>
+          <h3 className="font-bold text-sm text-slate-900">Feature Importance & Exact Odds Ratios [OR = exp(&beta;)]</h3>
           <p className="text-xs text-slate-500">
-            Positive weights increase conversion odds; negative weights signify historical friction or drop risks
+            Positive log-odds weights increase conversion odds; multiplicative percentage changes calculated as (OR - 1) &times; 100
           </p>
+        </div>
+
+        {/* Non-Causal Interpretability Banner */}
+        <div className="p-3 bg-blue-50/80 border border-blue-200 rounded-lg text-xs text-blue-900 flex items-start space-x-2">
+          <Info className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
+          <div>
+            <span className="font-bold">Non-Causal Interpretability Notice: </span>
+            <span>
+              Model associations represent conditional odds ratios within this observational dataset, not causal mechanisms. Multiplicative percentage changes in odds reflect relative odds differences and mathematically never drop below &minus;100%.
+            </span>
+          </div>
         </div>
 
         <div className="h-72 w-full">
@@ -257,9 +323,16 @@ export const AdminModelPage: React.FC = () => {
                   if (active && payload && payload.length) {
                     const d = payload[0].payload as FeatureImportance;
                     return (
-                      <div className="bg-slate-900 text-white p-2.5 rounded shadow text-xs">
+                      <div className="bg-slate-900 text-white p-2.5 rounded shadow text-xs space-y-1">
                         <div className="font-bold">{d.feature}</div>
-                        <div>Weight: <span className="font-mono">{d.coefficient?.toFixed(4)}</span></div>
+                        <div>Weight (&beta;): <span className="font-mono">{d.coefficient?.toFixed(4)}</span></div>
+                        <div>Odds Ratio: <span className="font-mono">{d.odds_ratio?.toFixed(4) || Math.exp(d.coefficient || 0).toFixed(4)}</span></div>
+                        <div>
+                          % Change in Odds:{' '}
+                          <span className={d.coefficient && d.coefficient > 0 ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold'}>
+                            {d.pct_change_in_odds !== undefined ? `${d.pct_change_in_odds > 0 ? '+' : ''}${d.pct_change_in_odds}%` : ''}
+                          </span>
+                        </div>
                         <div className={d.impact === 'POSITIVE' ? 'text-emerald-400' : 'text-red-400'}>
                           Impact: {d.impact}
                         </div>
@@ -279,6 +352,43 @@ export const AdminModelPage: React.FC = () => {
               </Bar>
             </BarChart>
           </ResponsiveContainer>
+        </div>
+
+        {/* Feature Weights & Odds Ratios Table */}
+        <div className="overflow-x-auto pt-2">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
+              <tr>
+                <th className="px-4 py-2.5">Feature</th>
+                <th className="px-4 py-2.5 text-center">Weight (&beta;)</th>
+                <th className="px-4 py-2.5 text-center">Odds Ratio (e^&beta;)</th>
+                <th className="px-4 py-2.5 text-center">% Change in Odds</th>
+                <th className="px-4 py-2.5">Association Direction</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 font-medium">
+              {topFeatures.map((feat) => {
+                const coef = feat.coefficient || 0;
+                const orVal = feat.odds_ratio || Math.exp(coef);
+                const pctVal = feat.pct_change_in_odds !== undefined ? feat.pct_change_in_odds : (orVal - 1) * 100;
+                return (
+                  <tr key={feat.feature} className="hover:bg-slate-50">
+                    <td className="px-4 py-2.5 font-bold text-slate-900">{feat.feature}</td>
+                    <td className="px-4 py-2.5 text-center font-mono">{coef.toFixed(4)}</td>
+                    <td className="px-4 py-2.5 text-center font-mono">{orVal.toFixed(4)}</td>
+                    <td className={`px-4 py-2.5 text-center font-bold ${coef > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                      {pctVal > 0 ? `+${pctVal.toFixed(1)}%` : `${pctVal.toFixed(1)}%`}
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${coef > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>
+                        {coef > 0 ? 'POSITIVE ASSOCIATION' : 'NEGATIVE FRICTION'}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
 

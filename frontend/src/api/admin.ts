@@ -83,12 +83,17 @@ export interface FeatureImportance {
   feature: string;
   importance: number;
   coefficient?: number;
+  odds_ratio?: number;
+  pct_change_in_odds?: number;
+  direction?: string;
   impact?: string;
+  non_causal_note?: string;
 }
 
 export interface ModelInfo {
   model_name: string;
   model_version: string;
+  phase?: string;
   trained_at: string;
   framework: string;
   dataset_shape: number[];
@@ -106,6 +111,13 @@ export interface ModelInfo {
     random_state: number;
     stratified: boolean;
   };
+  prevalence?: {
+    train: number;
+    validation: number;
+    test: number;
+  };
+  baseline_brier_score?: number;
+  calibration_assessment?: Record<string, any>;
   feature_schema: {
     categorical_features: string[];
     numeric_features: string[];
@@ -119,12 +131,26 @@ export interface EvaluationReport {
   comparison: Record<string, any>;
   selected_model: string;
   selection_rationale: string;
+  prevalence?: {
+    train: number;
+    validation: number;
+    test: number;
+  };
+  baseline_brier_score?: number;
+  calibration_assessment?: Record<string, any>;
   held_out_test_metrics: Record<string, any>;
   feature_importance: FeatureImportance[];
 }
 
 export interface PropensityOverview {
+  total_historical_leads?: number;
+  activated_leads?: number;
+  unconverted_leads?: number;
   total_unconverted_leads: number;
+  eligible_leads_for_prioritization?: number;
+  successfully_scored_leads?: number;
+  excluded_leads_count?: number;
+  excluded_leads_by_reason?: Record<string, number>;
   high_propensity_count: number;
   high_propensity_pct: number;
   medium_propensity_count: number;
@@ -133,6 +159,11 @@ export interface PropensityOverview {
   low_propensity_pct: number;
   thresholds: Record<string, number>;
   model_version: string;
+  baseline_brier_score?: number;
+  raw_brier_score?: number;
+  calibrated_brier_score?: number;
+  calibration_status?: string;
+  calibration_notes?: string;
 }
 
 export interface ScoredLead {
@@ -156,6 +187,8 @@ export interface ScoredLead {
   negative_factors: string[];
   business_summary?: string;
   actions_count?: number;
+  is_eligible_for_sales_action?: boolean;
+  exclusion_reason?: string | null;
 }
 
 export interface LeadPagination {

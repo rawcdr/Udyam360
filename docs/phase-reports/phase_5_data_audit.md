@@ -156,3 +156,34 @@ The propensity scoring engine is permitted to use **only** the following feature
 - **Website form:** 995 leads, 43 activations (**4.32% conversion rate**)
 - **WhatsApp campaign:** 358 leads, 10 activations (**2.79% conversion rate** — Lowest performing channel)
 
+---
+
+## 7. Phase 5.1 Audit: Deterministic Lead Eligibility & Prioritization Filter
+
+### 7.1 Scope Separation: Historical Analytics vs. Actionable Sales Prioritization
+In Phase 5.1, we audited the lead propensity prioritization pipeline to ensure that historical lead evaluation remains distinct from active sales follow-up:
+- **Historical Funnel Analytics:** Retains all 5,000 historical records to accurately reflect stage-by-stage drop-off rates and channel conversion benchmarks.
+- **Actionable Sales Prioritization:** Strictly filters for **unconverted leads in actionable funnel stages**, quarantining accounts that have already reached terminal service activation.
+
+### 7.2 Deterministic Eligibility Rules
+- **Eligible Funnel Stages:** `Lead`, `Contacted`, `Needs assessed`, `Quote accepted`, `KYC complete`.
+- **Exclusion Rule:** Any account with `stage_reached == 'Activated'` or `outcome == 'Activated'` is marked `is_eligible_for_sales_action = False` with `exclusion_reason = "ALREADY_ACTIVATED"`.
+- **Zero Silent Drops:** Leads with incomplete intake profiles or missing numerical telemetry (such as missing `monthly_telecom_spend_inr` or `num_sites`) are not dropped; robust median/mode imputation ensures 100% of eligible leads are scored and surfaced.
+
+### 7.3 Lead Funnel Segmentation Breakdown
+| Metric | Count | % of Historical | Status / Definition |
+| :--- | :---: | :---: | :--- |
+| **Total Historical Leads** | 5,000 | 100.00% | Complete Q2 2026 dataset |
+| **Activated Accounts (Quarantined)** | 368 | 7.36% | Excluded from sales outreach (`ALREADY_ACTIVATED`) |
+| **Unconverted Pipeline Leads** | 4,632 | 92.64% | Leads that stalled or dropped out of the funnel |
+| **Eligible for Sales Prioritization** | **4,632** | **92.64%** | Actionable unconverted leads across 5 funnel stages |
+| **Successfully Scored Eligible Leads** | **4,632** | **100.00%** | Scored by production calibrated ML pipeline |
+
+### 7.4 Corrected Propensity Distribution (Actionable Leads Only)
+The propensity distribution in the admin sales portal now strictly totals **4,632 actionable leads** (excluding the 368 already-activated accounts):
+- **High Propensity ($\ge 70\%$):** **569 leads** (12.28% of eligible) — Assigned for immediate high-touch consultative contact.
+- **Medium Propensity ($40\% - 70\%$):** **1,564 leads** (33.77% of eligible) — Assigned for automated nurture and product reconfiguration.
+- **Low Propensity ($< 40\%$):** **2,499 leads** (53.95% of eligible) — Kept in self-serve digital onboarding journeys.
+- **Total:** $569 + 1,564 + 2,499 = \mathbf{4,632}$ accounts.
+
+
