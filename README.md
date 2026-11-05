@@ -48,9 +48,9 @@ Udyam360 targets two core MSME sectors representing **79.12%** of the SMB market
 - **Backend:** Python 3.13.7, FastAPI, Uvicorn, Pydantic v2
 - **GenAI / LLM:** Google Gemini Developer API (`google-genai` SDK v2.34.0), utilizing `gemini-3.1-flash-lite` (free-tier preference)
 - **Data & ML:** Pandas, NumPy, Scikit-Learn, OpenPyXL
-- **Testing & Tooling:** PyTest, HTTPX, Pillow, Python-Dotenv
+- **Testing & Tooling:** PyTest, HTTPX, Pillow, Python-Dotenv, Vitest, React Testing Library
 - **Hardware Acceleration:** Windows 11, Intel Core i5-12450H, 16GB RAM, NVIDIA GeForce RTX 3050 Laptop GPU (4GB VRAM)
-- **Frontend (Planned for Phase 1+):** React, TypeScript, Tailwind CSS, Vite
+- **Frontend (Phase 4):** React 18, TypeScript, Tailwind CSS, Vite 5, React Router v6, Axios, Lucide React
 
 ---
 
@@ -256,49 +256,47 @@ Token Usage Metadata:
 ```
 
 ### Run Unit and Integration Tests
-To run the full suite of 109 deterministic tests (Catalogue, Eligibility, Pricing, Recommendation, API, Advisor Guardrails, Conversation isolation, OCR abstractions, KYC validation, consent, and security):
+To run the full suite of 118 deterministic backend tests (Catalogue, Eligibility, Pricing, Recommendation, API, Advisor Guardrails, Conversation isolation, OCR abstractions, KYC validation, consent, orders, and security):
 ```powershell
 pytest -v
 ```
 *(Note: Automated unit tests run fully offline via deterministic fallback fixtures without consuming Gemini API quota).*
 
-### Run Live Gemini Advisor Test
-To execute the live end-to-end integration test against `gemini-3.1-flash-lite` (profile extraction, deterministic recommendation, and grounded natural language synthesis):
+### Run Frontend Automated Tests
+To run the 14 Vitest & React Testing Library component and flow tests:
 ```powershell
-python scripts/test_advisor_live.py
+cd frontend
+npm test
+cd ..
 ```
 
-### Run KYC Specimen OCR Benchmark
-To benchmark the local OCR engine across all 47 specimen document images (`K01`–`K12`):
+### Run Full End-to-End Customer Flow Verification
+To execute the automated end-to-end verification script tracing health, advisor chat, recommendation scoring, quote preview, KYC consent/upload/OCR, and order state machine progression:
 ```powershell
-python scripts/evaluate_kyc_ocr.py
+python scripts/verify_e2e_flow.py
 ```
 
 ### Start the FastAPI Backend Server
 ```powershell
 uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 --reload
 ```
-Once started, explore the interactive Swagger API documentation at:
+Interactive API documentation:
 - Swagger UI: `http://127.0.0.1:8000/docs`
 - OpenAPI JSON: `http://127.0.0.1:8000/openapi.json`
 
-Advisor endpoints available at `/api/v1/advisor/`:
-- `POST /start`: Initialize new conversational session.
-- `POST /message`: Send user message and receive grounded recommendations.
-- `GET  /conversation/{id}`: Inspect active conversation state and profile.
-- `POST /reset/{id}`: Reset and discard active session history.
-- `GET  /health`: Health check for Gemini model connectivity.
+### Start the React Frontend Application
+```powershell
+cd frontend
+npm run dev
+```
+Customer web application: `http://localhost:5173/`
 
-Smart KYC endpoints available at `/api/v1/kyc/`:
-- `POST /cases`: Create a new KYC onboarding application.
-- `GET  /cases/{id}`: Retrieve case status and document list.
-- `POST /cases/{id}/consent`: Record explicit customer consent.
-- `POST /cases/{id}/documents`: Multipart upload for KYC documents (PNG, JPEG, PDF).
-- `GET  /cases/{id}/documents`: List uploaded document metadata.
-- `POST /cases/{id}/process`: Run local OCR, registry lookup, and cross-document verification.
-- `GET  /cases/{id}/status`: High-level summary of verification status and review reasons.
-- `GET  /cases/{id}/validation`: Detailed explainable validation report.
-- `DELETE /cases/{id}`: Safely delete development case and associated storage files.
+### Order Lifecycle & Tracking Endpoints available at `/api/v1/orders/`:
+- `POST /`: Create a new customer order from confirmed quote and KYC case.
+- `GET  /{order_id}`: Retrieve complete order status and customer details.
+- `GET  /{order_id}/timeline`: Retrieve order audit milestone event log.
+- `GET  /track/{order_reference}`: Customer-facing order lookup by tracking reference (`UDYAM-ORD-2026-XXXXXXXX`).
+- `POST /{order_id}/advance`: Progress order lifecycle state (with clear `(Demo / Simulated)` labeling).
 
 ---
 
@@ -333,5 +331,6 @@ python scripts/inspect_dataset.py
 | **Phase 1: FastAPI REST APIs** | **COMPLETED** | Endpoints for catalogue, segments, eligibility, recommendations, quotes |
 | **Phase 2: AI Business Advisor** | **COMPLETED** | Conversational onboarding, Gemini profile extraction, Phase 1 grounded advice, dual fallback engine |
 | **Phase 3: Smart KYC & OCR** | **COMPLETED** | Local CPU OCR (Windows Media OCR/RapidOCR), mock GST/Udyam registries, 47 specimen evaluations, DPDP compliance |
-| **Phase 4+: Order Tracker & Admin**| *Pending* | Real-time order tracker and executive ML analytics dashboard |
+| **Phase 4: Customer Web App** | **COMPLETED** | React 18 + TS + Tailwind frontend, Advisor UI, Recommendations & Quote review, Smart KYC consent/upload, Order State Machine & Live Tracker |
+| **Phase 5+: Admin & ML Analytics** | *Pending* | Executive analytics dashboard and ML-powered lead propensity scoring |
 
