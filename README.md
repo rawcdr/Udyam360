@@ -74,12 +74,21 @@ Udyam360/
 │   │   ├── api/                     # REST API routers
 │   │   │   ├── __init__.py
 │   │   │   ├── advisor.py           # GenAI Conversational Advisor endpoints
+│   │   │   ├── admin.py             # Executive Admin & ML Analytics endpoints
 │   │   │   ├── catalogue.py         # Product catalogue endpoints
 │   │   │   ├── eligibility.py       # Eligibility evaluation endpoint
 │   │   │   ├── kyc.py               # Smart KYC & Document Verification endpoints
+│   │   │   ├── orders.py            # Order management and lifecycle endpoints
 │   │   │   ├── quotes.py            # Server-side quote preview endpoint
 │   │   │   ├── recommendations.py   # Multi-tier bundle recommendation endpoint
 │   │   │   └── segments.py          # Customer segments endpoints
+│   │   ├── ml/                      # Zero-leakage ML lead propensity package
+│   │   │   ├── explainability.py    # Log-odds attribution & business explainer
+│   │   │   ├── feature_engineering.py # Allowlist feature selection & leakage quarantine
+│   │   │   ├── inference.py         # Calibrated propensity inference & stage plays
+│   │   │   ├── model_registry.py    # Model metadata & evaluation report loader
+│   │   │   ├── preprocessing.py     # Scikit-learn ColumnTransformer pipeline
+│   │   │   └── train.py             # Stratified benchmark trainer (LR, RF, HGB)
 │   │   ├── core/                    # App configuration and core settings
 │   │   │   ├── __init__.py
 │   │   │   └── config.py            # Centralized project settings & paths
@@ -98,6 +107,7 @@ Udyam360/
 │   │   │   ├── advisor_dialogue_service.py # Missing field analysis & clarification
 │   │   │   ├── advisor_orchestrator.py     # End-to-end advisor coordinator
 │   │   │   ├── advisor_response_service.py # Gemini grounded explanation & template fallback
+│   │   │   ├── analytics_service.py        # Executive KPI & 6-stage funnel analytics
 │   │   │   ├── bundle_explanation.py       # Deterministic bundle rationale service
 │   │   │   ├── catalogue_service.py        # Catalogue loading & integrity validator
 │   │   │   ├── conversation_service.py     # In-memory session & state merge manager
@@ -108,6 +118,7 @@ Udyam360/
 │   │   │   ├── kyc_orchestrator.py         # End-to-end KYC coordinator
 │   │   │   ├── kyc_storage_service.py      # Secure local file storage & binary sniffing
 │   │   │   ├── kyc_validation_service.py   # Freshness, required docs, cross-doc consistency
+│   │   │   ├── lead_scoring_service.py     # Propensity scoring, caching & sales audit log
 │   │   │   ├── llm_service.py              # Safe Gemini API integration wrapper
 │   │   │   ├── model_discovery.py          # Gemini model capability discovery script
 │   │   │   ├── ocr/                        # Local OCR provider abstraction package
@@ -298,6 +309,23 @@ Customer web application: `http://localhost:5173/`
 - `GET  /track/{order_reference}`: Customer-facing order lookup by tracking reference (`UDYAM-ORD-2026-XXXXXXXX`).
 - `POST /{order_id}/advance`: Progress order lifecycle state (with clear `(Demo / Simulated)` labeling).
 
+### Executive Admin & ML Propensity Endpoints available at `/api/v1/admin/` (Header: `X-Admin-Role: ExecutiveAdmin`):
+- `GET  /analytics/overview`: Headline KPIs matching dataset benchmarks (5,000 leads, 368 activations / 7.36%).
+- `GET  /analytics/funnel`: 6-stage drop progression & bottleneck diagnosis.
+- `GET  /analytics/segments`: Segment volumes and conversion rates.
+- `GET  /analytics/sources`: Acquisition channel performance (Referral 14.77% vs WhatsApp 2.79%).
+- `GET  /analytics/geography`: Tier 1/2/3 and top MSME hub distribution.
+- `GET  /ml/model-info`: Selected model architecture (`LogisticRegression`), version, and training splits.
+- `GET  /ml/evaluation`: Held-out test metrics and candidate model benchmark comparison.
+- `GET  /ml/feature-importance`: Top positive and negative log-odds feature drivers.
+- `GET  /ml/propensity-overview`: Pipeline breakdown across High ($\ge 70\%$), Medium, and Low bands.
+- `POST /ml/score`: Real-time single lead scoring with grounded driver explanations.
+- `GET  /ml/leads`: Searchable, filterable, and paginated unconverted lead table.
+- `GET  /leads/{lead_id}`: Full lead profile, conversion probability, and sales interaction history.
+- `POST /leads/{lead_id}/action`: Record follow-up interaction note (in-memory audit log).
+
+Executive Admin Portal: Navigate to `/admin` in the web application.
+
 ---
 
 ## 9. Dataset Location and Description
@@ -332,5 +360,6 @@ python scripts/inspect_dataset.py
 | **Phase 2: AI Business Advisor** | **COMPLETED** | Conversational onboarding, Gemini profile extraction, Phase 1 grounded advice, dual fallback engine |
 | **Phase 3: Smart KYC & OCR** | **COMPLETED** | Local CPU OCR (Windows Media OCR/RapidOCR), mock GST/Udyam registries, 47 specimen evaluations, DPDP compliance |
 | **Phase 4: Customer Web App** | **COMPLETED** | React 18 + TS + Tailwind frontend, Advisor UI, Recommendations & Quote review, Smart KYC consent/upload, Order State Machine & Live Tracker |
-| **Phase 5+: Admin & ML Analytics** | *Pending* | Executive analytics dashboard and ML-powered lead propensity scoring |
+| **Phase 5: Admin & ML Analytics** | **COMPLETED** | Executive Admin Dashboard, 6-stage funnel telemetry, zero-leakage ML pipeline, Logistic Regression lead scoring (ROC-AUC 0.6692, 100% odds explainability), sales action logging |
+| **Phase 6: Final Review & Polish** | *Pending* | Final end-to-end integration review, evaluation documentation, and presentation materials |
 

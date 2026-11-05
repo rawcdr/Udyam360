@@ -10,6 +10,10 @@ import { RecommendationsPage } from './pages/RecommendationsPage';
 import { QuotePage } from './pages/QuotePage';
 import { KYCPage } from './pages/KYCPage';
 import { OrderTrackerPage } from './pages/OrderTrackerPage';
+import { AdminLayout } from './pages/admin/AdminLayout';
+import { AdminOverviewPage } from './pages/admin/AdminOverviewPage';
+import { AdminLeadsPage } from './pages/admin/AdminLeadsPage';
+import { AdminModelPage } from './pages/admin/AdminModelPage';
 
 export const App: React.FC = () => {
   return (
@@ -29,6 +33,12 @@ export const App: React.FC = () => {
               <Route path="/kyc/status" element={<KYCPage />} />
               <Route path="/order/confirmation" element={<OrderTrackerPage />} />
               <Route path="/track-order" element={<OrderTrackerPage />} />
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminOverviewPage />} />
+                <Route path="overview" element={<AdminOverviewPage />} />
+                <Route path="leads" element={<AdminLeadsPage />} />
+                <Route path="model" element={<AdminModelPage />} />
+              </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>

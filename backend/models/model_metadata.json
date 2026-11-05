@@ -1,0 +1,251 @@
+{
+  "model_name": "LogisticRegression",
+  "model_version": "1.0.0",
+  "trained_at": "2026-11-05T18:42:25.154401+00:00",
+  "framework": "scikit-learn",
+  "dataset_shape": [
+    5000,
+    40
+  ],
+  "target": "outcome == 'Activated'",
+  "class_distribution": {
+    "total": 5000,
+    "activated": 368,
+    "dropped": 4632,
+    "activation_rate": 0.0736
+  },
+  "splits": {
+    "train_size": 3500,
+    "val_size": 750,
+    "test_size": 750,
+    "random_state": 42,
+    "stratified": true
+  },
+  "feature_schema": {
+    "categorical_features": [
+      "lead_source",
+      "business_type",
+      "segment",
+      "city",
+      "state",
+      "preferred_language",
+      "annual_turnover_band",
+      "has_gstin",
+      "has_udyam",
+      "current_internet",
+      "current_provider",
+      "contact_role"
+    ],
+    "numeric_features": [
+      "city_tier",
+      "employee_count",
+      "num_sites",
+      "monthly_telecom_spend_inr",
+      "created_day_of_week",
+      "created_month",
+      "num_products_of_interest",
+      "has_broadband_interest",
+      "has_voice_interest",
+      "has_cloud_security_interest",
+      "spend_per_employee",
+      "spend_per_site"
+    ],
+    "total_transformed_features": 128
+  },
+  "evaluation": {
+    "train": {
+      "roc_auc": 0.7763,
+      "pr_auc": 0.1815,
+      "brier_score": 0.2008,
+      "precision": 0.1598,
+      "recall": 0.7984,
+      "f1_score": 0.2663,
+      "confusion_matrix": [
+        [
+          2159,
+          1083
+        ],
+        [
+          52,
+          206
+        ]
+      ],
+      "calibration": {
+        "fraction_of_positives": [
+          0.0086,
+          0.0301,
+          0.0824,
+          0.1785,
+          0.1895
+        ],
+        "mean_predicted_value": [
+          0.1101,
+          0.2953,
+          0.4995,
+          0.6908,
+          0.8544
+        ]
+      }
+    },
+    "validation": {
+      "roc_auc": 0.6974,
+      "pr_auc": 0.1457,
+      "brier_score": 0.2157,
+      "precision": 0.1297,
+      "recall": 0.6909,
+      "f1_score": 0.2184,
+      "confusion_matrix": [
+        [
+          440,
+          255
+        ],
+        [
+          17,
+          38
+        ]
+      ],
+      "calibration": {
+        "fraction_of_positives": [
+          0.0256,
+          0.0273,
+          0.0994,
+          0.1524,
+          0.0811
+        ],
+        "mean_predicted_value": [
+          0.1113,
+          0.2987,
+          0.5001,
+          0.6912,
+          0.8457
+        ]
+      }
+    },
+    "test": {
+      "roc_auc": 0.6692,
+      "pr_auc": 0.1327,
+      "brier_score": 0.2136,
+      "precision": 0.1241,
+      "recall": 0.6182,
+      "f1_score": 0.2067,
+      "confusion_matrix": [
+        [
+          455,
+          240
+        ],
+        [
+          21,
+          34
+        ]
+      ],
+      "calibration": {
+        "fraction_of_positives": [
+          0.0305,
+          0.0489,
+          0.0789,
+          0.1389,
+          0.1429
+        ],
+        "mean_predicted_value": [
+          0.119,
+          0.3007,
+          0.5005,
+          0.6923,
+          0.8547
+        ]
+      }
+    }
+  },
+  "top_features": [
+    {
+      "feature": "lead_source_WhatsApp campaign",
+      "importance": 1.2578,
+      "coefficient": -1.2578,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "preferred_language_Punjabi",
+      "importance": 1.0006,
+      "coefficient": -1.0006,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "lead_source_Referral",
+      "importance": 0.9774,
+      "coefficient": 0.9774,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "has_gstin_N",
+      "importance": 0.9029,
+      "coefficient": -0.9029,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "business_type_Auto-parts unit",
+      "importance": 0.7578,
+      "coefficient": -0.7578,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "business_type_Real estate agency",
+      "importance": 0.742,
+      "coefficient": 0.742,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "has_gstin_Y",
+      "importance": 0.6787,
+      "coefficient": 0.6787,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "business_type_Restaurant chain",
+      "importance": 0.6774,
+      "coefficient": -0.6774,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "business_type_Mobile repair shop",
+      "importance": 0.6456,
+      "coefficient": 0.6456,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "business_type_Pharmacy",
+      "importance": 0.6295,
+      "coefficient": -0.6295,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "business_type_Gym chain",
+      "importance": 0.5803,
+      "coefficient": 0.5803,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "business_type_Electronics retail chain",
+      "importance": 0.5325,
+      "coefficient": -0.5325,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "lead_source_Website form",
+      "importance": 0.5266,
+      "coefficient": -0.5266,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "city_Vadodara",
+      "importance": 0.5177,
+      "coefficient": -0.5177,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "business_type_Optician",
+      "importance": 0.4848,
+      "coefficient": -0.4848,
+      "impact": "NEGATIVE"
+    }
+  ]
+}

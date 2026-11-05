@@ -1,0 +1,1016 @@
+{
+  "comparison": {
+    "LogisticRegression": {
+      "validation": {
+        "roc_auc": 0.6974,
+        "pr_auc": 0.1457,
+        "brier_score": 0.2157,
+        "precision": 0.1297,
+        "recall": 0.6909,
+        "f1_score": 0.2184,
+        "confusion_matrix": [
+          [
+            440,
+            255
+          ],
+          [
+            17,
+            38
+          ]
+        ],
+        "calibration": {
+          "fraction_of_positives": [
+            0.0256,
+            0.0273,
+            0.0994,
+            0.1524,
+            0.0811
+          ],
+          "mean_predicted_value": [
+            0.1113,
+            0.2987,
+            0.5001,
+            0.6912,
+            0.8457
+          ]
+        }
+      },
+      "test": {
+        "roc_auc": 0.6692,
+        "pr_auc": 0.1327,
+        "brier_score": 0.2136,
+        "precision": 0.1241,
+        "recall": 0.6182,
+        "f1_score": 0.2067,
+        "confusion_matrix": [
+          [
+            455,
+            240
+          ],
+          [
+            21,
+            34
+          ]
+        ],
+        "calibration": {
+          "fraction_of_positives": [
+            0.0305,
+            0.0489,
+            0.0789,
+            0.1389,
+            0.1429
+          ],
+          "mean_predicted_value": [
+            0.119,
+            0.3007,
+            0.5005,
+            0.6923,
+            0.8547
+          ]
+        }
+      }
+    },
+    "RandomForest": {
+      "validation": {
+        "roc_auc": 0.6819,
+        "pr_auc": 0.1302,
+        "brier_score": 0.1753,
+        "precision": 0.1166,
+        "recall": 0.4727,
+        "f1_score": 0.1871,
+        "confusion_matrix": [
+          [
+            498,
+            197
+          ],
+          [
+            29,
+            26
+          ]
+        ],
+        "calibration": {
+          "fraction_of_positives": [
+            0.018,
+            0.0431,
+            0.1108,
+            0.1379
+          ],
+          "mean_predicted_value": [
+            0.1391,
+            0.3241,
+            0.4994,
+            0.6299
+          ]
+        }
+      },
+      "test": {
+        "roc_auc": 0.6526,
+        "pr_auc": 0.1133,
+        "brier_score": 0.1758,
+        "precision": 0.1045,
+        "recall": 0.4182,
+        "f1_score": 0.1673,
+        "confusion_matrix": [
+          [
+            498,
+            197
+          ],
+          [
+            32,
+            23
+          ]
+        ],
+        "calibration": {
+          "fraction_of_positives": [
+            0.012,
+            0.0556,
+            0.1139,
+            0.098
+          ],
+          "mean_predicted_value": [
+            0.1347,
+            0.3247,
+            0.5016,
+            0.6298
+          ]
+        }
+      }
+    },
+    "HistGradientBoosting": {
+      "validation": {
+        "roc_auc": 0.6371,
+        "pr_auc": 0.1108,
+        "brier_score": 0.1104,
+        "precision": 0.1096,
+        "recall": 0.1455,
+        "f1_score": 0.125,
+        "confusion_matrix": [
+          [
+            630,
+            65
+          ],
+          [
+            47,
+            8
+          ]
+        ],
+        "calibration": {
+          "fraction_of_positives": [
+            0.0505,
+            0.1277,
+            0.1127,
+            0.0811,
+            0.1667
+          ],
+          "mean_predicted_value": [
+            0.0648,
+            0.2884,
+            0.4935,
+            0.6921,
+            0.8407
+          ]
+        }
+      },
+      "test": {
+        "roc_auc": 0.6023,
+        "pr_auc": 0.11,
+        "brier_score": 0.1143,
+        "precision": 0.1169,
+        "recall": 0.1636,
+        "f1_score": 0.1364,
+        "confusion_matrix": [
+          [
+            627,
+            68
+          ],
+          [
+            46,
+            9
+          ]
+        ],
+        "calibration": {
+          "fraction_of_positives": [
+            0.0574,
+            0.0863,
+            0.1,
+            0.1429,
+            0.1818
+          ],
+          "mean_predicted_value": [
+            0.0667,
+            0.2862,
+            0.4771,
+            0.6848,
+            0.8398
+          ]
+        }
+      }
+    }
+  },
+  "selected_model": "LogisticRegression",
+  "selection_rationale": "LogisticRegression achieved superior balance of ROC-AUC (0.6974), PR-AUC (0.1457), and transparent feature-level odds ratio interpretability for sales action guidance.",
+  "held_out_test_metrics": {
+    "roc_auc": 0.6692,
+    "pr_auc": 0.1327,
+    "brier_score": 0.2136,
+    "precision": 0.1241,
+    "recall": 0.6182,
+    "f1_score": 0.2067,
+    "confusion_matrix": [
+      [
+        455,
+        240
+      ],
+      [
+        21,
+        34
+      ]
+    ],
+    "calibration": {
+      "fraction_of_positives": [
+        0.0305,
+        0.0489,
+        0.0789,
+        0.1389,
+        0.1429
+      ],
+      "mean_predicted_value": [
+        0.119,
+        0.3007,
+        0.5005,
+        0.6923,
+        0.8547
+      ]
+    }
+  },
+  "feature_importance": [
+    {
+      "feature": "lead_source_WhatsApp campaign",
+      "importance": 1.2578,
+      "coefficient": -1.2578,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "preferred_language_Punjabi",
+      "importance": 1.0006,
+      "coefficient": -1.0006,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "lead_source_Referral",
+      "importance": 0.9774,
+      "coefficient": 0.9774,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "has_gstin_N",
+      "importance": 0.9029,
+      "coefficient": -0.9029,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "business_type_Auto-parts unit",
+      "importance": 0.7578,
+      "coefficient": -0.7578,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "business_type_Real estate agency",
+      "importance": 0.742,
+      "coefficient": 0.742,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "has_gstin_Y",
+      "importance": 0.6787,
+      "coefficient": 0.6787,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "business_type_Restaurant chain",
+      "importance": 0.6774,
+      "coefficient": -0.6774,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "business_type_Mobile repair shop",
+      "importance": 0.6456,
+      "coefficient": 0.6456,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "business_type_Pharmacy",
+      "importance": 0.6295,
+      "coefficient": -0.6295,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "business_type_Gym chain",
+      "importance": 0.5803,
+      "coefficient": 0.5803,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "business_type_Electronics retail chain",
+      "importance": 0.5325,
+      "coefficient": -0.5325,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "lead_source_Website form",
+      "importance": 0.5266,
+      "coefficient": -0.5266,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "city_Vadodara",
+      "importance": 0.5177,
+      "coefficient": -0.5177,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "business_type_Optician",
+      "importance": 0.4848,
+      "coefficient": -0.4848,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "business_type_Plastic moulding unit",
+      "importance": 0.4632,
+      "coefficient": 0.4632,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "business_type_Pharmacy chain",
+      "importance": 0.4523,
+      "coefficient": 0.4523,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "preferred_language_Hindi",
+      "importance": 0.449,
+      "coefficient": 0.449,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "business_type_Bakery chain",
+      "importance": 0.4227,
+      "coefficient": 0.4227,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "current_provider_Local ISP",
+      "importance": 0.4216,
+      "coefficient": -0.4216,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "preferred_language_Bengali",
+      "importance": 0.4191,
+      "coefficient": 0.4191,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "current_provider_Accel",
+      "importance": 0.417,
+      "coefficient": 0.417,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "city_Ahmedabad",
+      "importance": 0.4103,
+      "coefficient": 0.4103,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "preferred_language_Tamil",
+      "importance": 0.3971,
+      "coefficient": -0.3971,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "segment_Micro retail & services",
+      "importance": 0.3824,
+      "coefficient": -0.3824,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "business_type_Insurance agency",
+      "importance": 0.3712,
+      "coefficient": -0.3712,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "business_type_Hardware store",
+      "importance": 0.3453,
+      "coefficient": -0.3453,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "business_type_Physiotherapy clinic",
+      "importance": 0.3447,
+      "coefficient": -0.3447,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "preferred_language_English",
+      "importance": 0.3442,
+      "coefficient": 0.3442,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "preferred_language_Gujarati",
+      "importance": 0.3409,
+      "coefficient": 0.3409,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "business_type_Pre-school chain",
+      "importance": 0.3244,
+      "coefficient": -0.3244,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "city_Lucknow",
+      "importance": 0.3109,
+      "coefficient": -0.3109,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "state_Uttar Pradesh",
+      "importance": 0.3109,
+      "coefficient": -0.3109,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "city_Bhopal",
+      "importance": 0.2963,
+      "coefficient": -0.2963,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "num_sites",
+      "importance": 0.2938,
+      "coefficient": -0.2938,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "current_provider_Accel (mobile only)",
+      "importance": 0.29,
+      "coefficient": 0.29,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "city_Pune",
+      "importance": 0.2853,
+      "coefficient": 0.2853,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "annual_turnover_band_5 - 25 cr",
+      "importance": 0.2823,
+      "coefficient": 0.2823,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "lead_source_Inbound call",
+      "importance": 0.2755,
+      "coefficient": 0.2755,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "business_type_Dental clinic",
+      "importance": 0.2734,
+      "coefficient": 0.2734,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "city_tier",
+      "importance": 0.2702,
+      "coefficient": -0.2702,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "lead_source_Channel partner",
+      "importance": 0.268,
+      "coefficient": 0.268,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "business_type_Bakery",
+      "importance": 0.267,
+      "coefficient": 0.267,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "business_type_Food processing unit",
+      "importance": 0.2604,
+      "coefficient": 0.2604,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "current_internet_Mobile hotspot",
+      "importance": 0.2566,
+      "coefficient": -0.2566,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "city_Kolkata",
+      "importance": 0.2541,
+      "coefficient": -0.2541,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "state_West Bengal",
+      "importance": 0.2541,
+      "coefficient": -0.2541,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "city_Nagpur",
+      "importance": 0.2507,
+      "coefficient": -0.2507,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "has_udyam_N",
+      "importance": 0.2494,
+      "coefficient": -0.2494,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "segment_Professional offices",
+      "importance": 0.242,
+      "coefficient": 0.242,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "city_Patna",
+      "importance": 0.2376,
+      "coefficient": 0.2376,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "state_Bihar",
+      "importance": 0.2376,
+      "coefficient": 0.2376,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "annual_turnover_band_< 40 lakh",
+      "importance": 0.224,
+      "coefficient": -0.224,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "preferred_language_Marathi",
+      "importance": 0.2175,
+      "coefficient": -0.2175,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "city_Jaipur",
+      "importance": 0.2027,
+      "coefficient": 0.2027,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "state_Rajasthan",
+      "importance": 0.2027,
+      "coefficient": 0.2027,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "current_internet_Leased line",
+      "importance": 0.2023,
+      "coefficient": 0.2023,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "current_provider_Competitor B",
+      "importance": 0.2015,
+      "coefficient": -0.2015,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "city_Ludhiana",
+      "importance": 0.1997,
+      "coefficient": 0.1997,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "state_Punjab",
+      "importance": 0.1997,
+      "coefficient": 0.1997,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "annual_turnover_band_1.5 - 5 cr",
+      "importance": 0.1995,
+      "coefficient": -0.1995,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "current_provider_Competitor A",
+      "importance": 0.1975,
+      "coefficient": -0.1975,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "preferred_language_Malayalam",
+      "importance": 0.1933,
+      "coefficient": -0.1933,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "business_type_Law office",
+      "importance": 0.1924,
+      "coefficient": 0.1924,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "state_Gujarat",
+      "importance": 0.188,
+      "coefficient": -0.188,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "city_Hyderabad",
+      "importance": 0.1867,
+      "coefficient": -0.1867,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "state_Telangana",
+      "importance": 0.1867,
+      "coefficient": -0.1867,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "monthly_telecom_spend_inr",
+      "importance": 0.1857,
+      "coefficient": 0.1857,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "city_Kochi",
+      "importance": 0.1805,
+      "coefficient": 0.1805,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "state_Kerala",
+      "importance": 0.1805,
+      "coefficient": 0.1805,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "state_Madhya Pradesh",
+      "importance": 0.1795,
+      "coefficient": -0.1795,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "city_Nashik",
+      "importance": 0.1666,
+      "coefficient": 0.1666,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "business_type_Sweet shop",
+      "importance": 0.1662,
+      "coefficient": 0.1662,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "segment_Small manufacturers",
+      "importance": 0.1585,
+      "coefficient": -0.1585,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "business_type_Printing press",
+      "importance": 0.1576,
+      "coefficient": -0.1576,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "business_type_Travel agency",
+      "importance": 0.1565,
+      "coefficient": -0.1565,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "city_Mumbai",
+      "importance": 0.155,
+      "coefficient": -0.155,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "current_internet_Business broadband",
+      "importance": 0.1503,
+      "coefficient": -0.1503,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "current_internet_Mixed per site",
+      "importance": 0.1493,
+      "coefficient": 0.1493,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "business_type_Budget hotel group",
+      "importance": 0.1336,
+      "coefficient": 0.1336,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "contact_role_Owner",
+      "importance": 0.1299,
+      "coefficient": -0.1299,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "spend_per_site",
+      "importance": 0.1267,
+      "coefficient": -0.1267,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "city_Indore",
+      "importance": 0.1168,
+      "coefficient": 0.1168,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "annual_turnover_band_40 lakh - 1.5 cr",
+      "importance": 0.1163,
+      "coefficient": -0.1163,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "business_type_Architecture studio",
+      "importance": 0.1162,
+      "coefficient": -0.1162,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "business_type_Boutique",
+      "importance": 0.1158,
+      "coefficient": 0.1158,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "business_type_CA firm",
+      "importance": 0.114,
+      "coefficient": 0.114,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "current_internet_Missing",
+      "importance": 0.1106,
+      "coefficient": -0.1106,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "current_provider_Missing",
+      "importance": 0.1106,
+      "coefficient": -0.1106,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "contact_role_Office admin",
+      "importance": 0.1092,
+      "coefficient": -0.1092,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "business_type_Packaging unit",
+      "importance": 0.1039,
+      "coefficient": 0.1039,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "num_products_of_interest",
+      "importance": 0.0828,
+      "coefficient": -0.0828,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "city_Surat",
+      "importance": 0.0806,
+      "coefficient": -0.0806,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "business_type_Diagnostic lab",
+      "importance": 0.0765,
+      "coefficient": -0.0765,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "segment_Small multi-site businesses",
+      "importance": 0.0747,
+      "coefficient": 0.0747,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "city_Chennai",
+      "importance": 0.0731,
+      "coefficient": -0.0731,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "business_type_Salon",
+      "importance": 0.068,
+      "coefficient": -0.068,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "contact_role_Manager",
+      "importance": 0.0677,
+      "coefficient": 0.0677,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "has_broadband_interest",
+      "importance": 0.0641,
+      "coefficient": -0.0641,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "business_type_Textile unit",
+      "importance": 0.064,
+      "coefficient": -0.064,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "created_day_of_week",
+      "importance": 0.0611,
+      "coefficient": -0.0611,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "current_internet_Home broadband",
+      "importance": 0.0584,
+      "coefficient": -0.0584,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "city_Coimbatore",
+      "importance": 0.0583,
+      "coefficient": 0.0583,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "contact_role_Partner",
+      "importance": 0.0529,
+      "coefficient": -0.0529,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "employee_count",
+      "importance": 0.0483,
+      "coefficient": -0.0483,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "state_Maharashtra",
+      "importance": 0.0462,
+      "coefficient": 0.0462,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "business_type_Stationery shop",
+      "importance": 0.0458,
+      "coefficient": -0.0458,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "city_Visakhapatnam",
+      "importance": 0.0451,
+      "coefficient": 0.0451,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "state_Andhra Pradesh",
+      "importance": 0.0451,
+      "coefficient": 0.0451,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "lead_source_Field sales",
+      "importance": 0.0392,
+      "coefficient": 0.0392,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "created_month",
+      "importance": 0.0358,
+      "coefficient": -0.0358,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "annual_turnover_band_25 - 100 cr",
+      "importance": 0.0333,
+      "coefficient": 0.0333,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "city_Delhi",
+      "importance": 0.0269,
+      "coefficient": -0.0269,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "state_Delhi",
+      "importance": 0.0269,
+      "coefficient": -0.0269,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "has_udyam_Y",
+      "importance": 0.0251,
+      "coefficient": 0.0251,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "state_Karnataka",
+      "importance": 0.0249,
+      "coefficient": 0.0249,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "city_Bengaluru",
+      "importance": 0.0211,
+      "coefficient": 0.0211,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "business_type_Apparel retail chain",
+      "importance": 0.0201,
+      "coefficient": 0.0201,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "preferred_language_Telugu",
+      "importance": 0.0201,
+      "coefficient": 0.0201,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "has_voice_interest",
+      "importance": 0.019,
+      "coefficient": -0.019,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "spend_per_employee",
+      "importance": 0.0166,
+      "coefficient": 0.0166,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "business_type_Coaching centre",
+      "importance": 0.0148,
+      "coefficient": -0.0148,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "state_Tamil Nadu",
+      "importance": 0.0148,
+      "coefficient": -0.0148,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "preferred_language_Kannada",
+      "importance": 0.011,
+      "coefficient": 0.011,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "business_type_Furniture workshop",
+      "importance": 0.0066,
+      "coefficient": -0.0066,
+      "impact": "NEGATIVE"
+    },
+    {
+      "feature": "has_cloud_security_interest",
+      "importance": 0.0053,
+      "coefficient": 0.0053,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "city_Mysuru",
+      "importance": 0.0038,
+      "coefficient": 0.0038,
+      "impact": "POSITIVE"
+    },
+    {
+      "feature": "business_type_Kirana store",
+      "importance": 0.0037,
+      "coefficient": -0.0037,
+      "impact": "NEGATIVE"
+    }
+  ]
+}

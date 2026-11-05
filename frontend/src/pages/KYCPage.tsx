@@ -350,7 +350,7 @@ export const KYCPage: React.FC = () => {
                     <div className="truncate pr-2">
                       <p className="font-bold text-slate-800 truncate">{uploadedMeta.original_filename}</p>
                       <p className="text-[10px] text-slate-400">
-                        {(uploadedMeta.file_size_bytes / 1024).toFixed(1)} KB • {uploadedMeta.detected_mime}
+                        {(uploadedMeta.file_size_bytes / 1024).toFixed(1)} KB • {uploadedMeta.mime_type}
                       </p>
                     </div>
                     <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">
@@ -438,7 +438,7 @@ export const KYCPage: React.FC = () => {
             </div>
 
             <p className="text-[11px] text-slate-400 font-mono">
-              Processed: {new Date(kycValidation.processed_at).toLocaleTimeString()}
+              Processed: {new Date().toLocaleTimeString()}
             </p>
           </div>
 
