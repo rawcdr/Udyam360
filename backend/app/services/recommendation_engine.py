@@ -141,6 +141,12 @@ class RecommendationEngine:
         """Assemble product set for a specific tier based on segment preferences and requested items."""
         tier_products: Set[str] = set(requested_ids)
 
+        # Deduplicate multiple base connectivity products matched from generic keywords like 'broadband'
+        # A single site needs only ONE primary internet connection per bundle tier
+        base_connectivity_ids = {"P01", "P02", "P03", "P04", "P05", "P06"}
+        if len(tier_products.intersection(base_connectivity_ids)) > 1:
+            tier_products.difference_update(base_connectivity_ids)
+
         # Base connectivity product selection
         connectivity_options = [p for p in ["P04", "P01", "P02", "P03"] if p in eligible_ids]
 

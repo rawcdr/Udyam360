@@ -9,6 +9,12 @@ from dotenv import load_dotenv
 # Base directory of the project
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 
+# Load environment variables
+for env_path in [BASE_DIR / ".env", BASE_DIR / "backend" / ".env", Path(".env"), Path("backend/.env")]:
+    if env_path.exists():
+        load_dotenv(dotenv_path=env_path)
+        break
+
 
 def find_dataset_dir() -> Path:
     """Discover dataset directory dynamically without hardcoded absolute paths."""
@@ -40,6 +46,15 @@ class Settings:
 
     # Synthetic baseline date per hackathon rules
     BASELINE_DATE: str = "2026-07-15"
+
+    # Gemini & LLM Configuration
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite")
+    LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "gemini")
+    GEMINI_REQUEST_TIMEOUT_SECONDS: int = int(os.getenv("GEMINI_REQUEST_TIMEOUT_SECONDS", "30"))
+    MAX_CONVERSATION_HISTORY: int = int(os.getenv("MAX_CONVERSATION_HISTORY", "20"))
+    MAX_ADVISOR_RETRIES: int = int(os.getenv("MAX_ADVISOR_RETRIES", "2"))
+    ADVISOR_ENABLED: bool = os.getenv("ADVISOR_ENABLED", "True").lower() in ("true", "1")
 
     # Default Recommendation Scoring Weights
     WEIGHT_REQUIREMENT_MATCH: float = 0.50

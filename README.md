@@ -73,6 +73,7 @@ Udyam360/
 │   │   ├── main.py                  # FastAPI application entrypoint & middleware
 │   │   ├── api/                     # REST API routers
 │   │   │   ├── __init__.py
+│   │   │   ├── advisor.py           # GenAI Conversational Advisor endpoints
 │   │   │   ├── catalogue.py         # Product catalogue endpoints
 │   │   │   ├── segments.py          # Customer segments endpoints
 │   │   │   ├── eligibility.py       # Eligibility evaluation endpoint
@@ -83,6 +84,7 @@ Udyam360/
 │   │   │   └── config.py            # Centralized project settings & paths
 │   │   ├── schemas/                 # Pydantic data schemas
 │   │   │   ├── __init__.py
+│   │   │   ├── advisor.py           # Conversational profile extraction & message models
 │   │   │   ├── business_profile.py  # Customer business profile models
 │   │   │   ├── catalogue.py         # Product & catalogue summary models
 │   │   │   ├── eligibility.py       # Eligibility evaluation models
@@ -91,23 +93,34 @@ Udyam360/
 │   │   │   └── recommendation.py    # Bundle recommendation & scoring models
 │   │   ├── services/                # Business services & recommendation logic
 │   │   │   ├── __init__.py
-│   │   │   ├── bundle_explanation.py# Deterministic bundle rationale service
-│   │   │   ├── catalogue_service.py # Catalogue loading & integrity validator
-│   │   │   ├── eligibility_engine.py# Hard rules & dependency resolution engine
-│   │   │   ├── llm_service.py       # Safe Gemini API integration wrapper
-│   │   │   ├── model_discovery.py   # Gemini model capability discovery script
-│   │   │   ├── pricing_engine.py    # High-precision decimal pricing calculator
-│   │   │   └── segment_service.py   # Segment intelligence & suitability scoring
+│   │   │   ├── advisor_dialogue_service.py # Missing field analysis & clarification
+│   │   │   ├── advisor_orchestrator.py     # End-to-end advisor coordinator
+│   │   │   ├── advisor_response_service.py # Gemini grounded explanation & template fallback
+│   │   │   ├── bundle_explanation.py       # Deterministic bundle rationale service
+│   │   │   ├── catalogue_service.py        # Catalogue loading & integrity validator
+│   │   │   ├── conversation_service.py     # In-memory session & state merge manager
+│   │   │   ├── eligibility_engine.py       # Hard rules & dependency resolution engine
+│   │   │   ├── llm_service.py              # Safe Gemini API integration wrapper
+│   │   │   ├── model_discovery.py          # Gemini model capability discovery script
+│   │   │   ├── pricing_engine.py           # High-precision decimal pricing calculator
+│   │   │   ├── profile_extraction_service.py # Gemini structured JSON + regex extractor
+│   │   │   └── segment_service.py          # Segment intelligence & suitability scoring
 │   │   └── utils/                   # Shared utility functions
 │   │       └── __init__.py
 │   │
-│   ├── tests/                       # Comprehensive PyTest test suite (46 tests)
+│   ├── tests/                       # Comprehensive PyTest test suite (69 tests)
 │   │   ├── __init__.py
+│   │   ├── conftest.py              # Pytest fixtures & quota isolation
+│   │   ├── test_advisor_api.py      # Advisor REST API endpoint tests
+│   │   ├── test_advisor_guardrails.py # Guardrails, fallbacks & prompt injection tests
+│   │   ├── test_advisor_orchestrator.py # Multi-turn orchestration tests (Scenarios A-D)
 │   │   ├── test_api.py              # REST API endpoint integration tests
 │   │   ├── test_catalogue.py        # Catalogue service unit tests
+│   │   ├── test_conversation.py    # Session isolation & state merge tests
 │   │   ├── test_eligibility.py      # Hard constraints & dependency tests
 │   │   ├── test_llm_service.py      # LLM service health check unit tests
 │   │   ├── test_pricing.py          # Pricing engine unit tests
+│   │   ├── test_profile_extraction.py # Dual-mode extraction unit tests
 │   │   └── test_recommendation.py   # Archetype recommendation tests
 │   ├── test_gemini.py               # Gemini Developer API connectivity test
 │   ├── .env                         # Environment secrets (Git-ignored)
@@ -120,16 +133,21 @@ Udyam360/
 ├── docs/
 │   ├── architecture/                # System architecture documentation
 │   │   ├── README.md
+│   │   ├── advisor_architecture.md  # GenAI Advisor architecture & Mermaid flows
 │   │   └── recommendation_engine.md # Architecture & Mermaid pipeline diagram
 │   └── phase-reports/               # Execution reports & inventories
 │       ├── catalogue_schema_analysis.md # Column-by-column catalogue analysis
 │       ├── dataset_inventory.md     # Full dataset validation report
 │       ├── phase_0_report.md        # Phase 0 setup & validation report
-│       └── phase_1_report.md        # Phase 1 execution & test report
+│       ├── phase_1_audit_before_phase_2.md # Audit findings & fixes applied
+│       ├── phase_1_report.md        # Phase 1 execution & test report
+│       ├── phase_2_evaluation.md    # Comprehensive evaluation of Scenarios A-J
+│       └── phase_2_report.md        # Phase 2 execution & delivery report
 │
 ├── scripts/
 │   ├── analyze_catalogue.py         # Catalogue distribution analyzer
 │   ├── inspect_dataset.py           # Dataset audit and verification script
+│   ├── test_advisor_live.py         # Standalone live Gemini integration test
 │   └── verify_environment.py        # System hardware & dependency audit
 │
 ├── pytest.ini                       # Pytest configuration
@@ -209,9 +227,16 @@ Token Usage Metadata:
 ```
 
 ### Run Unit and Integration Tests
-To run the full suite of 46 deterministic tests (Catalogue, Eligibility, Pricing, Recommendation, API, and LLM health checks):
+To run the full suite of 69 deterministic tests (Catalogue, Eligibility, Pricing, Recommendation, API, Advisor Guardrails, and Conversation isolation):
 ```powershell
 pytest -v
+```
+*(Note: Automated unit tests run fully offline via deterministic fallback fixtures without consuming Gemini API quota).*
+
+### Run Live Gemini Advisor Test
+To execute the live end-to-end integration test against `gemini-3.1-flash-lite` (profile extraction, deterministic recommendation, and grounded natural language synthesis):
+```powershell
+python scripts/test_advisor_live.py
 ```
 
 ### Start the FastAPI Backend Server
@@ -221,6 +246,13 @@ uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 --reload
 Once started, explore the interactive Swagger API documentation at:
 - Swagger UI: `http://127.0.0.1:8000/docs`
 - OpenAPI JSON: `http://127.0.0.1:8000/openapi.json`
+
+Advisor endpoints available at `/api/v1/advisor/`:
+- `POST /start`: Initialize new conversational session.
+- `POST /message`: Send user message and receive grounded recommendations.
+- `GET  /conversation/{id}`: Inspect active conversation state and profile.
+- `POST /reset/{id}`: Reset and discard active session history.
+- `GET  /health`: Health check for Gemini model connectivity.
 
 ---
 
@@ -253,7 +285,7 @@ python scripts/inspect_dataset.py
 | **Phase 1: Recommendation Engine** | **COMPLETED** | Deterministic Essential, Growth, and Premium bundle generation |
 | **Phase 1: Pricing & Explanations** | **COMPLETED** | Decimal arithmetic, OTC/MRC separation & structured rationales |
 | **Phase 1: FastAPI REST APIs** | **COMPLETED** | Endpoints for catalogue, segments, eligibility, recommendations, quotes |
-| **Phase 2+: AI Business Advisor** | *Pending* | Conversational MSME advisor with Gemini integration |
+| **Phase 2: AI Business Advisor** | **COMPLETED** | Conversational onboarding, Gemini profile extraction, Phase 1 grounded advice, dual fallback engine |
 | **Phase 3+: Smart KYC & OCR** | *Pending* | Document OCR, synthetic registry verification & fraud detection |
 | **Phase 4+: Order Tracker & Admin**| *Pending* | Real-time order tracker and executive ML analytics dashboard |
 
