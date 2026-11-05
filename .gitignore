@@ -1,0 +1,48 @@
+# Environment variables and secrets
+.env
+backend/.env
+*.env
+*.env.local
+
+# Python Virtual Environments
+venv/
+backend/venv/
+.venv/
+env/
+ENV/
+
+# Python cache and bytecode
+__pycache__/
+*/__pycache__/
+*/*/__pycache__/
+*.py[cod]
+*$py.class
+
+# Pytest / Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDE / Editor configuration
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# Node / Frontend build (for future phases)
+node_modules/
+dist/
+build/
+
+# Logs
+*.log
+logs/
+

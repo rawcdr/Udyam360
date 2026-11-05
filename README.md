@@ -70,22 +70,45 @@ Udyam360/
 ├── backend/
 │   ├── app/
 │   │   ├── __init__.py
-│   │   ├── api/                     # API routers and endpoints
-│   │   │   └── __init__.py
-│   │   ├── core/                    # App configuration and core settings
-│   │   │   └── __init__.py
-│   │   ├── schemas/                 # Pydantic data schemas
-│   │   │   └── __init__.py
-│   │   ├── services/                # Business services & LLM service
+│   │   ├── main.py                  # FastAPI application entrypoint & middleware
+│   │   ├── api/                     # REST API routers
 │   │   │   ├── __init__.py
+│   │   │   ├── catalogue.py         # Product catalogue endpoints
+│   │   │   ├── segments.py          # Customer segments endpoints
+│   │   │   ├── eligibility.py       # Eligibility evaluation endpoint
+│   │   │   ├── recommendations.py   # Multi-tier bundle recommendation endpoint
+│   │   │   └── quotes.py            # Server-side quote preview endpoint
+│   │   ├── core/                    # App configuration and core settings
+│   │   │   ├── __init__.py
+│   │   │   └── config.py            # Centralized project settings & paths
+│   │   ├── schemas/                 # Pydantic data schemas
+│   │   │   ├── __init__.py
+│   │   │   ├── business_profile.py  # Customer business profile models
+│   │   │   ├── catalogue.py         # Product & catalogue summary models
+│   │   │   ├── eligibility.py       # Eligibility evaluation models
+│   │   │   ├── pricing.py           # Breakdown & contract pricing models
+│   │   │   ├── quote.py             # Quote preview request/response models
+│   │   │   └── recommendation.py    # Bundle recommendation & scoring models
+│   │   ├── services/                # Business services & recommendation logic
+│   │   │   ├── __init__.py
+│   │   │   ├── bundle_explanation.py# Deterministic bundle rationale service
+│   │   │   ├── catalogue_service.py # Catalogue loading & integrity validator
+│   │   │   ├── eligibility_engine.py# Hard rules & dependency resolution engine
 │   │   │   ├── llm_service.py       # Safe Gemini API integration wrapper
-│   │   │   └── model_discovery.py   # Gemini model capability discovery script
+│   │   │   ├── model_discovery.py   # Gemini model capability discovery script
+│   │   │   ├── pricing_engine.py    # High-precision decimal pricing calculator
+│   │   │   └── segment_service.py   # Segment intelligence & suitability scoring
 │   │   └── utils/                   # Shared utility functions
 │   │       └── __init__.py
 │   │
-│   ├── tests/                       # Pytest test suite
+│   ├── tests/                       # Comprehensive PyTest test suite (46 tests)
 │   │   ├── __init__.py
-│   │   └── test_llm_service.py      # LLM service health check unit tests
+│   │   ├── test_api.py              # REST API endpoint integration tests
+│   │   ├── test_catalogue.py        # Catalogue service unit tests
+│   │   ├── test_eligibility.py      # Hard constraints & dependency tests
+│   │   ├── test_llm_service.py      # LLM service health check unit tests
+│   │   ├── test_pricing.py          # Pricing engine unit tests
+│   │   └── test_recommendation.py   # Archetype recommendation tests
 │   ├── test_gemini.py               # Gemini Developer API connectivity test
 │   ├── .env                         # Environment secrets (Git-ignored)
 │   ├── .env.example                 # Example configuration template
@@ -96,12 +119,16 @@ Udyam360/
 │
 ├── docs/
 │   ├── architecture/                # System architecture documentation
-│   │   └── README.md
+│   │   ├── README.md
+│   │   └── recommendation_engine.md # Architecture & Mermaid pipeline diagram
 │   └── phase-reports/               # Execution reports & inventories
+│       ├── catalogue_schema_analysis.md # Column-by-column catalogue analysis
 │       ├── dataset_inventory.md     # Full dataset validation report
-│       └── phase_0_report.md        # Phase 0 setup & validation report
+│       ├── phase_0_report.md        # Phase 0 setup & validation report
+│       └── phase_1_report.md        # Phase 1 execution & test report
 │
 ├── scripts/
+│   ├── analyze_catalogue.py         # Catalogue distribution analyzer
 │   ├── inspect_dataset.py           # Dataset audit and verification script
 │   └── verify_environment.py        # System hardware & dependency audit
 │
@@ -181,11 +208,19 @@ Token Usage Metadata:
   - Total tokens: 41
 ```
 
-### Run Unit Tests
-To verify LLM service health checks without making network calls:
+### Run Unit and Integration Tests
+To run the full suite of 46 deterministic tests (Catalogue, Eligibility, Pricing, Recommendation, API, and LLM health checks):
 ```powershell
 pytest -v
 ```
+
+### Start the FastAPI Backend Server
+```powershell
+uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 --reload
+```
+Once started, explore the interactive Swagger API documentation at:
+- Swagger UI: `http://127.0.0.1:8000/docs`
+- OpenAPI JSON: `http://127.0.0.1:8000/openapi.json`
 
 ---
 
@@ -213,5 +248,12 @@ python scripts/inspect_dataset.py
 | **Phase 0: Dataset Discovery** | **COMPLETED** | 100% record verification across all CSVs & KYC files |
 | **Phase 0: Gemini API Validation** | **COMPLETED** | Verified with `gemini-3.1-flash-lite` (latency ~1.47s, exact string match) |
 | **Phase 0: Architecture & Reports** | **COMPLETED** | Detailed dataset inventory and Phase 0 report created |
-| **Phase 1+: Business Features** | *Pending* | Business Advisor, Bundle Recommender, Smart KYC, Order Tracker |
+| **Phase 1: Catalogue Intelligence** | **COMPLETED** | Full 25-product validation, referential integrity & schema mapping |
+| **Phase 1: Eligibility Engine** | **COMPLETED** | Hard constraint checks & dependency graph closure resolver |
+| **Phase 1: Recommendation Engine** | **COMPLETED** | Deterministic Essential, Growth, and Premium bundle generation |
+| **Phase 1: Pricing & Explanations** | **COMPLETED** | Decimal arithmetic, OTC/MRC separation & structured rationales |
+| **Phase 1: FastAPI REST APIs** | **COMPLETED** | Endpoints for catalogue, segments, eligibility, recommendations, quotes |
+| **Phase 2+: AI Business Advisor** | *Pending* | Conversational MSME advisor with Gemini integration |
+| **Phase 3+: Smart KYC & OCR** | *Pending* | Document OCR, synthetic registry verification & fraud detection |
+| **Phase 4+: Order Tracker & Admin**| *Pending* | Real-time order tracker and executive ML analytics dashboard |
 
