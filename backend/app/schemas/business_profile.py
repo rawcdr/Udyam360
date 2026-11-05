@@ -33,6 +33,10 @@ def normalize_segment_string(val: Optional[str]) -> Optional[str]:
 class BusinessProfile(BaseModel):
     """Customer profile representing an MSME onboarder."""
 
+    business_name: Optional[str] = Field(
+        default=None,
+        description="Legal or trade name of the MSME enterprise",
+    )
     business_type: Optional[str] = Field(
         default=None,
         description="Type of business (e.g. Kirana Store, Pharmacy, Clinic, CA Firm, Coaching Centre)",

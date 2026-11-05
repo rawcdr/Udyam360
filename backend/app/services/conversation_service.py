@@ -96,6 +96,10 @@ class ConversationService:
         updated = []
 
         # Scalar field updates (allows corrections)
+        if getattr(ext, "business_name", None) is not None and ext.business_name != cur.business_name:
+            cur.business_name = ext.business_name
+            updated.append("business_name")
+
         if ext.business_type is not None and ext.business_type != cur.business_type:
             cur.business_type = ext.business_type
             updated.append("business_type")

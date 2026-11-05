@@ -75,10 +75,11 @@ Udyam360/
 │   │   │   ├── __init__.py
 │   │   │   ├── advisor.py           # GenAI Conversational Advisor endpoints
 │   │   │   ├── catalogue.py         # Product catalogue endpoints
-│   │   │   ├── segments.py          # Customer segments endpoints
 │   │   │   ├── eligibility.py       # Eligibility evaluation endpoint
+│   │   │   ├── kyc.py               # Smart KYC & Document Verification endpoints
+│   │   │   ├── quotes.py            # Server-side quote preview endpoint
 │   │   │   ├── recommendations.py   # Multi-tier bundle recommendation endpoint
-│   │   │   └── quotes.py            # Server-side quote preview endpoint
+│   │   │   └── segments.py          # Customer segments endpoints
 │   │   ├── core/                    # App configuration and core settings
 │   │   │   ├── __init__.py
 │   │   │   └── config.py            # Centralized project settings & paths
@@ -88,6 +89,7 @@ Udyam360/
 │   │   │   ├── business_profile.py  # Customer business profile models
 │   │   │   ├── catalogue.py         # Product & catalogue summary models
 │   │   │   ├── eligibility.py       # Eligibility evaluation models
+│   │   │   ├── kyc.py               # KYC application, document, and validation models
 │   │   │   ├── pricing.py           # Breakdown & contract pricing models
 │   │   │   ├── quote.py             # Quote preview request/response models
 │   │   │   └── recommendation.py    # Bundle recommendation & scoring models
@@ -100,15 +102,28 @@ Udyam360/
 │   │   │   ├── catalogue_service.py        # Catalogue loading & integrity validator
 │   │   │   ├── conversation_service.py     # In-memory session & state merge manager
 │   │   │   ├── eligibility_engine.py       # Hard rules & dependency resolution engine
+│   │   │   ├── kyc_consent_service.py      # Customer consent capture & withdrawal
+│   │   │   ├── kyc_document_service.py     # Document metadata & lifecycle manager
+│   │   │   ├── kyc_extraction_service.py   # Document-specific field extractors
+│   │   │   ├── kyc_orchestrator.py         # End-to-end KYC coordinator
+│   │   │   ├── kyc_storage_service.py      # Secure local file storage & binary sniffing
+│   │   │   ├── kyc_validation_service.py   # Freshness, required docs, cross-doc consistency
 │   │   │   ├── llm_service.py              # Safe Gemini API integration wrapper
 │   │   │   ├── model_discovery.py          # Gemini model capability discovery script
+│   │   │   ├── ocr/                        # Local OCR provider abstraction package
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── base.py                 # Abstract BaseOCRProvider interface
+│   │   │   │   ├── local_ocr.py            # WinOCR, RapidOCR, and MockOCR implementations
+│   │   │   │   ├── preprocessing.py        # Grayscale, contrast enhancement, sharpening
+│   │   │   │   └── provider.py             # Provider selector factory
 │   │   │   ├── pricing_engine.py           # High-precision decimal pricing calculator
 │   │   │   ├── profile_extraction_service.py # Gemini structured JSON + regex extractor
+│   │   │   ├── registry_verification_service.py # Mock GSTIN and Udyam CSV lookup service
 │   │   │   └── segment_service.py          # Segment intelligence & suitability scoring
 │   │   └── utils/                   # Shared utility functions
 │   │       └── __init__.py
 │   │
-│   ├── tests/                       # Comprehensive PyTest test suite (69 tests)
+│   ├── tests/                       # Comprehensive PyTest test suite (109 tests)
 │   │   ├── __init__.py
 │   │   ├── conftest.py              # Pytest fixtures & quota isolation
 │   │   ├── test_advisor_api.py      # Advisor REST API endpoint tests
@@ -118,10 +133,18 @@ Udyam360/
 │   │   ├── test_catalogue.py        # Catalogue service unit tests
 │   │   ├── test_conversation.py    # Session isolation & state merge tests
 │   │   ├── test_eligibility.py      # Hard constraints & dependency tests
+│   │   ├── test_kyc_api.py          # KYC REST API endpoint integration tests
+│   │   ├── test_kyc_consent.py      # Consent grant, decline, withdrawal tests
+│   │   ├── test_kyc_extraction.py   # Document field parsing & normalization tests
+│   │   ├── test_kyc_orchestrator.py # KYC pipeline end-to-end workflow tests
+│   │   ├── test_kyc_security.py     # File validation, path traversal, isolation tests
+│   │   ├── test_kyc_validation.py   # Freshness, requirements, consistency tests
 │   │   ├── test_llm_service.py      # LLM service health check unit tests
+│   │   ├── test_ocr_service.py      # OCR provider abstraction & preprocessing tests
 │   │   ├── test_pricing.py          # Pricing engine unit tests
 │   │   ├── test_profile_extraction.py # Dual-mode extraction unit tests
-│   │   └── test_recommendation.py   # Archetype recommendation tests
+│   │   ├── test_recommendation.py   # Archetype recommendation tests
+│   │   └── test_registry_verification.py # Mock GSTIN and Udyam lookup tests
 │   ├── test_gemini.py               # Gemini Developer API connectivity test
 │   ├── .env                         # Environment secrets (Git-ignored)
 │   ├── .env.example                 # Example configuration template
@@ -134,7 +157,9 @@ Udyam360/
 │   ├── architecture/                # System architecture documentation
 │   │   ├── README.md
 │   │   ├── advisor_architecture.md  # GenAI Advisor architecture & Mermaid flows
+│   │   ├── kyc_architecture.md      # Smart KYC architecture & Mermaid flows
 │   │   └── recommendation_engine.md # Architecture & Mermaid pipeline diagram
+│   ├── kyc_privacy_security.md      # DPDP Act compliance, data retention & file isolation
 │   └── phase-reports/               # Execution reports & inventories
 │       ├── catalogue_schema_analysis.md # Column-by-column catalogue analysis
 │       ├── dataset_inventory.md     # Full dataset validation report
@@ -142,10 +167,14 @@ Udyam360/
 │       ├── phase_1_audit_before_phase_2.md # Audit findings & fixes applied
 │       ├── phase_1_report.md        # Phase 1 execution & test report
 │       ├── phase_2_evaluation.md    # Comprehensive evaluation of Scenarios A-J
-│       └── phase_2_report.md        # Phase 2 execution & delivery report
+│       ├── phase_2_report.md        # Phase 2 execution & delivery report
+│       ├── phase_3_ocr_evaluation.md # Benchmark report on 47 specimen documents
+│       ├── phase_3_preimplementation_audit.md # Pre-implementation audit & conventions
+│       └── phase_3_report.md        # Phase 3 execution & delivery report
 │
 ├── scripts/
 │   ├── analyze_catalogue.py         # Catalogue distribution analyzer
+│   ├── evaluate_kyc_ocr.py          # Standalone benchmark across 47 specimen documents
 │   ├── inspect_dataset.py           # Dataset audit and verification script
 │   ├── test_advisor_live.py         # Standalone live Gemini integration test
 │   └── verify_environment.py        # System hardware & dependency audit
@@ -227,7 +256,7 @@ Token Usage Metadata:
 ```
 
 ### Run Unit and Integration Tests
-To run the full suite of 69 deterministic tests (Catalogue, Eligibility, Pricing, Recommendation, API, Advisor Guardrails, and Conversation isolation):
+To run the full suite of 109 deterministic tests (Catalogue, Eligibility, Pricing, Recommendation, API, Advisor Guardrails, Conversation isolation, OCR abstractions, KYC validation, consent, and security):
 ```powershell
 pytest -v
 ```
@@ -237,6 +266,12 @@ pytest -v
 To execute the live end-to-end integration test against `gemini-3.1-flash-lite` (profile extraction, deterministic recommendation, and grounded natural language synthesis):
 ```powershell
 python scripts/test_advisor_live.py
+```
+
+### Run KYC Specimen OCR Benchmark
+To benchmark the local OCR engine across all 47 specimen document images (`K01`–`K12`):
+```powershell
+python scripts/evaluate_kyc_ocr.py
 ```
 
 ### Start the FastAPI Backend Server
@@ -253,6 +288,17 @@ Advisor endpoints available at `/api/v1/advisor/`:
 - `GET  /conversation/{id}`: Inspect active conversation state and profile.
 - `POST /reset/{id}`: Reset and discard active session history.
 - `GET  /health`: Health check for Gemini model connectivity.
+
+Smart KYC endpoints available at `/api/v1/kyc/`:
+- `POST /cases`: Create a new KYC onboarding application.
+- `GET  /cases/{id}`: Retrieve case status and document list.
+- `POST /cases/{id}/consent`: Record explicit customer consent.
+- `POST /cases/{id}/documents`: Multipart upload for KYC documents (PNG, JPEG, PDF).
+- `GET  /cases/{id}/documents`: List uploaded document metadata.
+- `POST /cases/{id}/process`: Run local OCR, registry lookup, and cross-document verification.
+- `GET  /cases/{id}/status`: High-level summary of verification status and review reasons.
+- `GET  /cases/{id}/validation`: Detailed explainable validation report.
+- `DELETE /cases/{id}`: Safely delete development case and associated storage files.
 
 ---
 
@@ -286,6 +332,6 @@ python scripts/inspect_dataset.py
 | **Phase 1: Pricing & Explanations** | **COMPLETED** | Decimal arithmetic, OTC/MRC separation & structured rationales |
 | **Phase 1: FastAPI REST APIs** | **COMPLETED** | Endpoints for catalogue, segments, eligibility, recommendations, quotes |
 | **Phase 2: AI Business Advisor** | **COMPLETED** | Conversational onboarding, Gemini profile extraction, Phase 1 grounded advice, dual fallback engine |
-| **Phase 3+: Smart KYC & OCR** | *Pending* | Document OCR, synthetic registry verification & fraud detection |
+| **Phase 3: Smart KYC & OCR** | **COMPLETED** | Local CPU OCR (Windows Media OCR/RapidOCR), mock GST/Udyam registries, 47 specimen evaluations, DPDP compliance |
 | **Phase 4+: Order Tracker & Admin**| *Pending* | Real-time order tracker and executive ML analytics dashboard |
 

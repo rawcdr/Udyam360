@@ -10,6 +10,7 @@ from app.api.eligibility import router as eligibility_router
 from app.api.recommendations import router as recommendations_router
 from app.api.quotes import router as quotes_router
 from app.api.advisor import router as advisor_router
+from app.api.kyc import kyc_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -37,6 +38,7 @@ app.include_router(eligibility_router, prefix=API_V1_PREFIX)
 app.include_router(recommendations_router, prefix=API_V1_PREFIX)
 app.include_router(quotes_router, prefix=API_V1_PREFIX)
 app.include_router(advisor_router, prefix=API_V1_PREFIX)
+app.include_router(kyc_router, prefix=API_V1_PREFIX)
 
 
 @app.get("/health", tags=["System Health"])

@@ -46,3 +46,7 @@ build/
 *.log
 logs/
 
+# Local Storage
+backend/storage/
+storage/
+

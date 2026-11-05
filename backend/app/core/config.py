@@ -68,6 +68,18 @@ class Settings:
     SEGMENT_MULTI_SITE: str = "multi"
     SEGMENT_MANUFACTURING: str = "mfg"
 
+    # Phase 3: Smart KYC & Document Storage Configuration
+    KYC_STORAGE_DIR: Path = BASE_DIR / "backend" / "storage" / "kyc_documents"
+    KYC_SYNTHETIC_REFERENCE_DATE: str = "2026-07-15"
+    KYC_ADDRESS_PROOF_MAX_AGE_DAYS: int = 90
+    KYC_MAX_FILE_SIZE_BYTES: int = 10 * 1024 * 1024  # 10 MB limit
+    KYC_ALLOWED_EXTENSIONS: set = {"png", "jpg", "jpeg", "pdf"}
+    KYC_ALLOWED_MIME_TYPES: set = {"image/png", "image/jpeg", "application/pdf"}
+    OCR_PROVIDER: str = os.getenv("OCR_PROVIDER", "auto")
+    OCR_MIN_CONFIDENCE_THRESHOLD: float = 0.60
+    NAME_SIMILARITY_THRESHOLD: float = 0.75
+    ADDRESS_SIMILARITY_THRESHOLD: float = 0.70
+
 
 settings = Settings()
 
