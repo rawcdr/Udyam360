@@ -431,12 +431,15 @@ export const RecommendationsPage: React.FC = () => {
                 <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
                   <div>
                     <span className="font-extrabold text-slate-900">
-                      ₹{prod.monthly_price_min.toLocaleString()}
+                      ₹{(prod.monthly_price_min ?? (prod as any).price_min_inr_per_month ?? 0).toLocaleString()}
                     </span>
-                    {prod.monthly_price_min !== prod.monthly_price_max && (
-                      <span className="text-slate-500"> – ₹{prod.monthly_price_max.toLocaleString()}</span>
+                    {(prod.monthly_price_min ?? (prod as any).price_min_inr_per_month ?? 0) !==
+                      (prod.monthly_price_max ?? (prod as any).price_max_inr_per_month ?? 0) && (
+                      <span className="text-slate-500">
+                        {' '}– ₹{(prod.monthly_price_max ?? (prod as any).price_max_inr_per_month ?? 0).toLocaleString()}
+                      </span>
                     )}
-                    <span className="text-[10px] text-slate-400">/{prod.pricing_unit}</span>
+                    <span className="text-[10px] text-slate-400">/{prod.pricing_unit ?? (prod as any).unit ?? 'per site'}</span>
                   </div>
 
                   {prod.requires_gstin && (

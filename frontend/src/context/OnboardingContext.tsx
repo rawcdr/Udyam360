@@ -34,17 +34,17 @@ interface OnboardingContextType {
 }
 
 const defaultProfile: BusinessProfile = {
-  business_name: null,
-  business_type: null,
+  business_name: 'Apollo Care Pharmacy',
+  business_type: 'Pharmacy',
   segment: 'micro',
   sites_count: 1,
-  num_employees: 3,
+  num_employees: 4,
   city: 'Bengaluru',
   city_tier: 1,
-  gstin_available: false,
+  gstin_available: true,
   udyam_available: true,
-  budget_monthly: 3000,
-  requested_services: [],
+  budget_monthly: 4000,
+  requested_services: ['Office Internet', 'Business Calling SIM'],
 };
 
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);

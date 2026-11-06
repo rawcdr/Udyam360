@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { OnboardingProvider } from './context/OnboardingContext';
 import { Navbar } from './components/layout/Navbar';
@@ -10,10 +10,27 @@ import { RecommendationsPage } from './pages/RecommendationsPage';
 import { QuotePage } from './pages/QuotePage';
 import { KYCPage } from './pages/KYCPage';
 import { OrderTrackerPage } from './pages/OrderTrackerPage';
-import { AdminLayout } from './pages/admin/AdminLayout';
-import { AdminOverviewPage } from './pages/admin/AdminOverviewPage';
-import { AdminLeadsPage } from './pages/admin/AdminLeadsPage';
-import { AdminModelPage } from './pages/admin/AdminModelPage';
+
+// Lazy-load admin portal routes to decouple recharts and admin bundles from customer journey
+const AdminLayout = lazy(() =>
+  import('./pages/admin/AdminLayout').then((m) => ({ default: m.AdminLayout }))
+);
+const AdminOverviewPage = lazy(() =>
+  import('./pages/admin/AdminOverviewPage').then((m) => ({ default: m.AdminOverviewPage }))
+);
+const AdminLeadsPage = lazy(() =>
+  import('./pages/admin/AdminLeadsPage').then((m) => ({ default: m.AdminLeadsPage }))
+);
+const AdminModelPage = lazy(() =>
+  import('./pages/admin/AdminModelPage').then((m) => ({ default: m.AdminModelPage }))
+);
+
+const AdminLoadingFallback: React.FC = () => (
+  <div className="min-h-[400px] flex flex-col items-center justify-center p-12 text-slate-500">
+    <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin mb-4" />
+    <p className="text-sm font-medium">Loading executive portal...</p>
+  </div>
+);
 
 export const App: React.FC = () => {
   return (
@@ -33,11 +50,46 @@ export const App: React.FC = () => {
               <Route path="/kyc/status" element={<KYCPage />} />
               <Route path="/order/confirmation" element={<OrderTrackerPage />} />
               <Route path="/track-order" element={<OrderTrackerPage />} />
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<AdminOverviewPage />} />
-                <Route path="overview" element={<AdminOverviewPage />} />
-                <Route path="leads" element={<AdminLeadsPage />} />
-                <Route path="model" element={<AdminModelPage />} />
+              <Route
+                path="/admin"
+                element={
+                  <Suspense fallback={<AdminLoadingFallback />}>
+                    <AdminLayout />
+                  </Suspense>
+                }
+              >
+                <Route
+                  index
+                  element={
+                    <Suspense fallback={<AdminLoadingFallback />}>
+                      <AdminOverviewPage />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="overview"
+                  element={
+                    <Suspense fallback={<AdminLoadingFallback />}>
+                      <AdminOverviewPage />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="leads"
+                  element={
+                    <Suspense fallback={<AdminLoadingFallback />}>
+                      <AdminLeadsPage />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="model"
+                  element={
+                    <Suspense fallback={<AdminLoadingFallback />}>
+                      <AdminModelPage />
+                    </Suspense>
+                  }
+                />
               </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

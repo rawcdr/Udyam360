@@ -267,19 +267,27 @@ Token Usage Metadata:
 ```
 
 ### Run Unit and Integration Tests
-To run the full suite of 118 deterministic backend tests (Catalogue, Eligibility, Pricing, Recommendation, API, Advisor Guardrails, Conversation isolation, OCR abstractions, KYC validation, consent, orders, and security):
+To run the full suite of 138 deterministic backend tests (Catalogue, Eligibility, Pricing, Recommendation, API, Advisor Guardrails, Conversation isolation, OCR abstractions, KYC validation, consent, orders, lead scoring, 5-fold calibration, and security):
 ```powershell
 pytest -v
 ```
 *(Note: Automated unit tests run fully offline via deterministic fallback fixtures without consuming Gemini API quota).*
 
 ### Run Frontend Automated Tests
-To run the 14 Vitest & React Testing Library component and flow tests:
+To run the 17 Vitest & React Testing Library component and flow tests:
 ```powershell
 cd frontend
 npm test
 cd ..
 ```
+
+### Build Frontend for Production (with Rollup Code Splitting)
+```powershell
+cd frontend
+npm run build
+cd ..
+```
+*Result: Optimized bundles with 56.8% reduction in initial customer bundle size (329.89 kB; 99.31 kB gzip), isolating Recharts into a separate lazy chunk.*
 
 ### Run Full End-to-End Customer Flow Verification
 To execute the automated end-to-end verification script tracing health, advisor chat, recommendation scoring, quote preview, KYC consent/upload/OCR, and order state machine progression:
@@ -328,7 +336,34 @@ Executive Admin Portal: Navigate to `/admin` in the web application.
 
 ---
 
-## 9. Dataset Location and Description
+## 9. Hackathon Submission Materials & Artifacts
+
+All final presentation and evaluation assets are located in the `submission/` directory:
+
+| Artifact | Location | Description & Specifications |
+| :--- | :--- | :--- |
+| **Business Case Presentation** | [`submission/Udyam360_Business_Case.pptx`](file:///c:/Users/adifr/OneDrive/Desktop/Udyam360/submission/Udyam360_Business_Case.pptx) | Exactly 10 widescreen (16:9) slides covering problem, solution, advisor, KYC, architecture, ML, impact, and privacy. |
+| **3-Minute Demo Script** | [`submission/Udyam360_Demo_Script.md`](file:///c:/Users/adifr/OneDrive/Desktop/Udyam360/submission/Udyam360_Demo_Script.md) | Exact 180-second timing breakdown across 6 cues, setup commands, live chat prompt, and fallbacks. |
+| **Privacy & Security Note** | [`submission/Udyam360_Privacy_Security_Note.pdf`](file:///c:/Users/adifr/OneDrive/Desktop/Udyam360/submission/Udyam360_Privacy_Security_Note.pdf) | Exactly 1 printable page covering all 11 DPDP compliance dimensions and statutory disclosures. |
+| **System Architecture Image** | [`submission/final_architecture.png`](file:///c:/Users/adifr/OneDrive/Desktop/Udyam360/submission/final_architecture.png) | High-resolution diagram (1600x1400) visualizing cloud AI vs local execution boundaries. |
+| **Live UI Screenshots (9 views)** | [`submission/screenshots/`](file:///c:/Users/adifr/OneDrive/Desktop/Udyam360/submission/screenshots/) | High-resolution captures of all 9 screens (`landing_page`, `advisor`, `recommendations`, `quote`, `kyc`, `order_tracker`, `admin_overview`, `admin_leads`, `admin_model`). |
+| **Submission Checklist** | [`submission/submission_checklist.md`](file:///c:/Users/adifr/OneDrive/Desktop/Udyam360/submission/submission_checklist.md) | Complete phase-by-phase quality assurance, data integrity, and compliance sign-off checklist. |
+
+To regenerate presentation deliverables from source:
+```powershell
+# Regenerate 10-slide PowerPoint presentation
+python scripts/generate_business_case_pptx.py
+
+# Regenerate 1-page Privacy & Security PDF note
+python scripts/generate_privacy_pdf.py
+
+# Regenerate high-resolution architecture diagram
+python scripts/generate_architecture_image.py
+```
+
+---
+
+## 10. Dataset Location and Description
 
 The dataset resides in `YTL_TrackA_Udyam_Digital_Data/`:
 - **`product_catalogue.csv`** (25 products): Product catalog with pricing, setup fees, minimum terms, and dependency rules.
@@ -344,7 +379,7 @@ python scripts/inspect_dataset.py
 
 ---
 
-## 10. Current Implementation Status
+## 11. Current Implementation Status
 
 | Stage / Component | Status | Description |
 | :--- | :--- | :--- |
@@ -360,6 +395,7 @@ python scripts/inspect_dataset.py
 | **Phase 2: AI Business Advisor** | **COMPLETED** | Conversational onboarding, Gemini profile extraction, Phase 1 grounded advice, dual fallback engine |
 | **Phase 3: Smart KYC & OCR** | **COMPLETED** | Local CPU OCR (Windows Media OCR/RapidOCR), mock GST/Udyam registries, 47 specimen evaluations, DPDP compliance |
 | **Phase 4: Customer Web App** | **COMPLETED** | React 18 + TS + Tailwind frontend, Advisor UI, Recommendations & Quote review, Smart KYC consent/upload, Order State Machine & Live Tracker |
-| **Phase 5: Admin & ML Analytics** | **COMPLETED** | Executive Admin Dashboard, 6-stage funnel telemetry, zero-leakage ML pipeline, Logistic Regression lead scoring (ROC-AUC 0.6692, 100% odds explainability), sales action logging |
-| **Phase 6: Final Review & Polish** | *Pending* | Final end-to-end integration review, evaluation documentation, and presentation materials |
+| **Phase 5: Admin & ML Analytics** | **COMPLETED** | Executive Admin Dashboard, 6-stage funnel telemetry, zero-leakage ML pipeline, Logistic Regression lead scoring, sales action logging |
+| **Phase 5.1: ML Metric Corrections** | **COMPLETED** | 4,632 actionable unconverted leads filter, 5-fold Platt Sigmoid calibration (Brier 0.0898), bounded log-odds odds |
+| **Phase 6: Final Review & Submission Packaging** | **COMPLETED** | Code splitting (56.8% bundle reduction), 10-slide pitch deck, 3-min demo script, 1-page privacy note, architecture diagram, 9 live UI screenshots, checklist |
 
