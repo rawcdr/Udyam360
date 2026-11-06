@@ -45,7 +45,7 @@ class KYCOrchestrator:
         """Initialize a new KYC onboarding case linked to an existing advisor session."""
         conv_state = conversation_service.get_conversation(advisor_session_id)
         if not conv_state:
-            raise ValueError(f"Advisor session '{advisor_session_id}' not found. Please start onboarding first.")
+            conv_state = conversation_service.create_conversation(advisor_session_id)
 
         # Capture frozen snapshot of the customer profile
         profile_dict = conv_state.profile.model_dump()

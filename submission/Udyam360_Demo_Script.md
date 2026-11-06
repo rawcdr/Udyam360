@@ -41,7 +41,7 @@ Prepare a single browser window (1080p / 1920x1080 resolution, 100% zoom) with 2
 * **Screen Displayed:** Tab 1 — `http://localhost:5173/` (Landing Page)
 * **Visual Action:** Scroll smoothly past the hero section highlighting the two target archetypes: **Micro Retail** and **Professional Offices**. Hover over the 4-step journey badge.
 * **Spoken Script:**
-  > *"Every month, tens of thousands of Indian small businesses—from local kiranas to CA clinics—try to digitize. Today, that journey is broken. An MSME owner talks to multiple disconnected vendors, waits 3 to 5 days just to receive a manual quote, submits physical paper KYC, and waits up to 2 weeks for activation. 
+  > *"Every month, tens of thousands of Indian small businesses—from local kiranas to CA clinics—try to digitize. Today, that journey is broken. An MSME owner talks to multiple disconnected vendors, waits 3 to 5 days just to receive a manual quote, submits physical paper KYC, and waits an average of 17.6 days for activation. 
   > 
   > Welcome to **Udyam360**—Airtel’s AI-powered digital onboarding platform that takes an MSME from zero to digitally activated in one single sitting."*
 * **Transition:** Click the primary red CTA: **"Start Digital Onboarding"** $\rightarrow$ Navigates to `/advisor`.
@@ -55,7 +55,7 @@ Prepare a single browser window (1080p / 1920x1080 resolution, 100% zoom) with 2
   2. Paste or type the demo prompt: *"I run Apollo Care Pharmacy in Bengaluru with 4 staff and ₹4,000 monthly spend. Need broadband and a calling SIM."*
   3. Send message. The live extraction badge updates on the right-hand panel, showing extracted archetype: *Micro Retail (Pharmacy)*, *Bengaluru (Tier 1)*, *Headcount: 4*, *Budget: ₹4,000/mo*.
 * **Spoken Script:**
-  > *"Instead of forcing a small business owner to navigate confusing telco product SKUs, our GenAI Advisor speaks their language. Powered by Gemini, it extracts the customer's business archetype, location, and telecom budget in real-time. 
+  > *"Instead of forcing a small business owner to navigate confusing telco product SKUs, our GenAI Advisor speaks their language. Powered by Gemini (gemini-3.1-flash-lite), it extracts the customer's business archetype, location, and telecom budget in real-time. 
   > 
   > Crucially, we enforce strict architectural boundaries: Gemini understands the conversation, but all product eligibility, catalog pricing, and commercial bundles are computed 100% deterministically on our backend."*
 * **Transition:** Click **"View Recommended Bundles"** $\rightarrow$ Navigates to `/recommendations`.
@@ -68,11 +68,11 @@ Prepare a single browser window (1080p / 1920x1080 resolution, 100% zoom) with 2
   1. Show the 3 dynamically scored bundles: **Essential** (lowest cost), **Growth** (recommended fit), and **Premium**.
   2. Point out the Growth bundle: *Airtel Office Internet (100 Mbps) + Airtel Business Calling SIM*.
   3. Select **Growth Bundle** and toggle the optional *Airtel Cloud Voice* add-on.
-  4. Click **"Review Formal Quote"** $\rightarrow$ On `/quote`, point to the clear separation of Monthly Recurring Charges (₹2,198/mo) vs. One-Time Setup Charges (₹1,000).
+  4. Click **"Review Formal Quote"** $\rightarrow$ On `/quote`, point to the clear itemized separation of Monthly Recurring Charges (₹2,198/mo) vs. One-Time Setup Charges (₹1,000).
 * **Spoken Script:**
-  > *"The engine evaluates 25 catalog products and generates three tailored packages: Essential, Growth, and Premium. For Apollo Pharmacy, it recommends our Growth bundle with broadband and business calling. 
+  > *"The engine evaluates 25 products from the supplied product catalogue and generates three tailored packages: Essential, Growth, and Premium. For Apollo Pharmacy, it recommends our Growth bundle with broadband and business calling. 
   > 
-  > Moving into quote preview, pricing is completely transparent. We strictly distinguish Monthly Recurring Charges from One-Time Setup fees, preventing the quote shock that causes 56% of MSME leads to abandon."*
+  > Moving into quote preview, pricing is completely transparent and itemized. We strictly distinguish Monthly Recurring Charges from One-Time Setup fees, preventing the quote shock that causes 56.4% of leads to drop between needs assessment and quote acceptance."*
 * **Transition:** Click **"Accept Quote & Proceed to KYC"** $\rightarrow$ Navigates to `/kyc`.
 
 ---
@@ -95,13 +95,13 @@ Prepare a single browser window (1080p / 1920x1080 resolution, 100% zoom) with 2
 ### [1:55 – 2:20] Instant Order Confirmation & Simulated Activation
 * **Screen Displayed:** Tab 1 — `/track-order`
 * **Visual Action:**
-  1. Point out the immutable generated **Order Reference** (`ORD-XXXXX`).
+  1. Point out the prototype generated **Order Reference** (`ORD-XXXXX`).
   2. Show the visual progression state machine: *Order Created $\rightarrow$ KYC Verified $\rightarrow$ Provisioning $\rightarrow$ Simulated Activation*.
   3. Point to the explicit notice badge: *"Notice: Simulated telecom provisioning in hackathon environment."*
 * **Spoken Script:**
-  > *"The customer immediately receives their official Order Reference. With automated verification complete, the order moves directly through provisioning into simulated activation. 
+  > *"The customer immediately receives their prototype Order Reference. With automated verification complete, the order moves directly through provisioning into simulated activation. 
   > 
-  > What used to take 14 days of back-and-forth manual paperwork is now concluded in under 3 minutes, with zero physical touchpoints."*
+  > What historically took an average of 17.6 days of back-and-forth manual paperwork is now concluded in this 3-minute prototype onboarding demonstration, with zero physical touchpoints."*
 * **Transition:** Switch to Browser Tab 2 — `http://localhost:5173/admin/overview`.
 
 ---
@@ -115,7 +115,7 @@ Prepare a single browser window (1080p / 1920x1080 resolution, 100% zoom) with 2
 * **Spoken Script:**
   > *"On the enterprise sales side, our Executive Admin Portal turns raw data into action. Across 5,000 hackathon leads, we diagnose exact funnel drop-offs. 
   > 
-  > For unconverted accounts, our ML Propensity Engine ranks 4,632 actionable leads. Crucially, we exclude already-activated customers, and we calibrated our model with Platt scaling, achieving a test Brier score of 0.0666 that beats the naive baseline. Sales reps get 100% explainable odds ratios with zero data leakage."*
+  > For unconverted accounts, our ML Propensity Engine ranks 4,632 actionable leads. Crucially, we exclude already-activated customers, and we calibrated our model with Platt scaling, achieving a test Brier score of 0.0666 that beats the naive baseline. Sales reps get interpretable logistic-regression odds ratios with zero data leakage."*
 
 ---
 

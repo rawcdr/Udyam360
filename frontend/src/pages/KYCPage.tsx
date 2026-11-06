@@ -53,9 +53,28 @@ export const KYCPage: React.FC = () => {
   useEffect(() => {
     const initOrLoadCase = async () => {
       try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlCaseId = urlParams.get('case');
+
+        if (urlCaseId) {
+          const loadedCase = await kycApi.getCase(urlCaseId);
+          setKycCase(loadedCase);
+          setConsentRecorded(loadedCase.consent_recorded);
+          setConsentGranted(loadedCase.consent_recorded);
+          const docs = await kycApi.listDocuments(urlCaseId);
+          setUploadedDocs(docs);
+          try {
+            const val = await kycApi.getValidationDetails(urlCaseId);
+            setKycValidation(val);
+          } catch {
+            // Processing not yet run
+          }
+          return;
+        }
+
         if (!kycCase) {
           const newCase = await kycApi.createCase({
-            advisor_session_id: conversationId,
+            advisor_session_id: conversationId || 'conv_default_guest',
             selected_product_ids: selectedProductIds,
             quote_reference: quote?.quote_id || 'Q-SAMPLE',
           });

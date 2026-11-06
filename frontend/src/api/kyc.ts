@@ -13,7 +13,10 @@ export const kycApi = {
     selected_product_ids: string[];
     quote_reference?: string | null;
   }): Promise<KYCCaseResponse> => {
-    const res = await apiClient.post<KYCCaseResponse>('/kyc/cases', payload);
+    const res = await apiClient.post<KYCCaseResponse>('/kyc/cases', {
+      ...payload,
+      advisor_session_id: payload.advisor_session_id || 'conv_default_guest',
+    });
     return res.data;
   },
 

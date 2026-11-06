@@ -10,13 +10,14 @@
 
 | Item | Required Specification | Deliverable Path | Status | Verification Detail |
 | :--- | :--- | :--- | :---: | :--- |
-| **Business Case Presentation** | $\le 10$ slides, 16:9 widescreen, .pptx | [`submission/Udyam360_Business_Case.pptx`](file:///c:/Users/adifr/OneDrive/Desktop/Udyam360/submission/Udyam360_Business_Case.pptx) | ✅ VERIFIED | Exactly 10 widescreen slides created via `python-pptx` |
-| **3-Minute Demo Script** | $\le 180$ seconds, 6 timed blocks, setup + fallbacks | [`submission/Udyam360_Demo_Script.md`](file:///c:/Users/adifr/OneDrive/Desktop/Udyam360/submission/Udyam360_Demo_Script.md) | ✅ VERIFIED | 180s total runtime, exact timing cues, seed prompts & fallbacks |
-| **Privacy & Security Note** | Exactly 1 printable page, 11 DPDP compliance points | [`submission/Udyam360_Privacy_Security_Note.pdf`](file:///c:/Users/adifr/OneDrive/Desktop/Udyam360/submission/Udyam360_Privacy_Security_Note.pdf) | ✅ VERIFIED | Built with ReportLab, verified `Page count: 1`, DPDP Act 2023 disclosures |
-| **Live UI Screenshots** | Real application views captured from running system | [`submission/screenshots/`](file:///c:/Users/adifr/OneDrive/Desktop/Udyam360/submission/screenshots/) | ✅ VERIFIED | 9 distinct high-resolution screenshots of live application views |
-| **Final System Architecture** | Comprehensive markdown + high-resolution diagram | [`docs/architecture/final_system_architecture.md`](file:///c:/Users/adifr/OneDrive/Desktop/Udyam360/docs/architecture/final_system_architecture.md)<br>[`submission/final_architecture.png`](file:///c:/Users/adifr/OneDrive/Desktop/Udyam360/submission/final_architecture.png) | ✅ VERIFIED | Full architecture blueprint with clear cloud vs local boundaries |
-| **Comprehensive Final Audit** | Complete codebase, schema, model, and endpoint audit | [`docs/phase-reports/phase_6_final_audit.md`](file:///c:/Users/adifr/OneDrive/Desktop/Udyam360/docs/phase-reports/phase_6_final_audit.md) | ✅ VERIFIED | Full phase-by-phase verification and integrity report |
-| **Final Completion Report** | Phase 6 milestone summary and sign-off | [`docs/phase-reports/phase_6_final_report.md`](file:///c:/Users/adifr/OneDrive/Desktop/Udyam360/docs/phase-reports/phase_6_final_report.md) | ✅ VERIFIED | Complete end-to-end operational documentation |
+| **Business Case Presentation** | $\le 10$ slides, 16:9 widescreen, .pptx | [`submission/Udyam360_Business_Case.pptx`](Udyam360_Business_Case.pptx) | ✅ VERIFIED | Exactly 10 widescreen slides created via `python-pptx` |
+| **3-Minute Demo Script** | $\le 180$ seconds, 6 timed blocks, setup + fallbacks | [`submission/Udyam360_Demo_Script.md`](Udyam360_Demo_Script.md) | ✅ VERIFIED | 180s total runtime, exact timing cues, seed prompts & fallbacks |
+| **Privacy & Security Note** | Exactly 1 printable page, 11 DPDP compliance points | [`submission/Udyam360_Privacy_Security_Note.pdf`](Udyam360_Privacy_Security_Note.pdf) | ✅ VERIFIED | Built with ReportLab, verified `Page count: 1`, DPDP Act 2023 disclosures |
+| **Live UI Screenshots** | Real application views captured from running system | [`submission/screenshots/`](screenshots/) | ✅ VERIFIED | 9 distinct high-resolution screenshots of live application views |
+| **Final System Architecture** | Comprehensive markdown + high-resolution diagram | [`docs/architecture/final_system_architecture.md`](../docs/architecture/final_system_architecture.md)<br>[`submission/final_architecture.png`](final_architecture.png) | ✅ VERIFIED | Full architecture blueprint with clear cloud vs local boundaries |
+| **Comprehensive Final Audit** | Complete codebase, schema, model, and endpoint audit | [`docs/phase-reports/phase_6_final_audit.md`](../docs/phase-reports/phase_6_final_audit.md) | ✅ VERIFIED | Full phase-by-phase verification and integrity report |
+| **Phase 6.1 Discrepancy Audit** | Comprehensive discrepancy audit across 10 areas | [`docs/phase-reports/phase_6_1_discrepancy_audit.md`](../docs/phase-reports/phase_6_1_discrepancy_audit.md) | ✅ VERIFIED | Ground truth metrics reconciliation and artifact audit |
+| **Phase 6.1 Final Report** | Milestone summary and sign-off report | [`docs/phase-reports/phase_6_1_final_report.md`](../docs/phase-reports/phase_6_1_final_report.md) | ✅ VERIFIED | Complete evidence audit and package verification |
 
 ---
 
@@ -33,8 +34,8 @@
   - Layout and navigation components: Passed.
   - Page render tests: Passed.
 - [x] **Frontend Production Build:** Vite build succeeds with zero errors (`npm run build`).
-  - Code splitting verified: Main customer bundle reduced from 764 kB to 327.99 kB (98.75 kB gzip).
-  - Admin analytics chunk isolated into separate chunk (`BarChart-...js`, 372 kB).
+  - Code splitting verified: Main customer bundle reduced from 764.2 kB to 330.23 kB raw (99.45 kB gzip) JS + 39.71 kB raw (7.01 kB gzip) CSS = 369.94 kB raw (106.46 kB gzip) total initial customer payload.
+  - Admin analytics chunk isolated into separate chunk (`BarChart-...js`, 372.13 kB raw / 108.83 kB gzip).
 - [x] **Data Integrity Verification:**
   - `YTL_TrackA_Udyam_Digital_Data/smb_leads.csv` remains strictly unmodified (SHA-256 preserved).
   - `YTL_TrackA_Udyam_Digital_Data/product_catalogue.csv` intact with all 25 official products.
@@ -69,8 +70,8 @@
 - [x] **Executive Admin Analytics & ML Lead Prioritization:**
   - Full funnel telemetry (5,000 historical leads).
   - Strict Phase 5.1 eligibility filter isolating 4,632 actionable unconverted leads for sales scoring.
-  - Calibrated Logistic Regression pipeline (Platt sigmoid calibration, Brier score = 0.0898).
-  - Explainable AI: Log-odds feature contributions with valid percentage odds impact.
+  - Calibrated Logistic Regression pipeline (Platt sigmoid 5-fold CV calibration, held-out test Brier score = 0.0666, beating naive baseline of 0.0680).
+  - Explainable AI: Log-odds feature contributions with valid percentage odds impact (mathematically bounded $\ge -100\%$).
 
 ---
 

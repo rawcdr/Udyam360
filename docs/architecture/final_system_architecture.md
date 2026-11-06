@@ -26,7 +26,7 @@ flowchart TD
     end
 
     subgraph Gateway ["API Gateway & Security Boundary"]
-        F划["FastAPI REST Application (ASGI)"]
+        FastAPI_App["FastAPI REST Application (ASGI)"]
         AG["Role Guard: X-Admin-Role (Prototype)"]
         CORS["CORS & Request Validation (Pydantic v2)"]
     end
@@ -44,7 +44,7 @@ flowchart TD
 
     subgraph AI_ML_Engines ["AI & Machine Learning Layer"]
         subgraph Cloud_AI ["External Cloud AI (Strict Boundary)"]
-            GEM["Google Gemini API (gemini-2.5-flash)"]
+            GEM["Google Gemini API (gemini-3.1-flash-lite)"]
         end
         subgraph Local_ML ["Local On-Premises ML / OCR (Zero Cloud Egress)"]
             OCR["Local RapidOCR / WinOCR Engine"]
@@ -60,28 +60,28 @@ flowchart TD
         REG_G["mock_gstin_registry.csv (Synthetic Registry)"]
         REG_U["mock_udyam_registry.csv (Synthetic Registry)"]
         MA["backend/models/ (Serialized Pipelines & JSON)"]
-        KYC_DIR["local_uploads/ (Temporary Doc Cache)"]
+        KYC_DIR["backend/storage/kyc_documents/"]
         MEM["In-Memory Stores (Sessions, Orders, Notes)"]
     end
 
     %% Client to Gateway
-    LP --> F划
-    ADV --> F划
-    REC --> F划
-    QT --> F划
-    KYC_UI --> F划
-    OT --> F划
-    Admin_Portal --> AG --> F划
+    LP --> FastAPI_App
+    ADV --> FastAPI_App
+    REC --> FastAPI_App
+    QT --> FastAPI_App
+    KYC_UI --> FastAPI_App
+    OT --> FastAPI_App
+    Admin_Portal --> AG --> FastAPI_App
 
     %% Gateway to Services
-    F划 --> AS
-    F划 --> CS
-    F划 --> RE
-    F划 --> QE
-    F划 --> KO
-    F划 --> OS
-    F划 --> AN
-    F划 --> LSS
+    FastAPI_App --> AS
+    FastAPI_App --> CS
+    FastAPI_App --> RE
+    FastAPI_App --> QE
+    FastAPI_App --> KO
+    FastAPI_App --> OS
+    FastAPI_App --> AN
+    FastAPI_App --> LSS
 
     %% Service to AI/ML & Data
     AS -.->|"1. Dialogue & Profile Extraction ONLY (No PII/Docs)"| GEM

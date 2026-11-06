@@ -114,7 +114,7 @@ def create_presentation():
     p_sub.space_after = Pt(16)
     
     p_vp = tf1.add_paragraph()
-    p_vp.text = "An AI-powered digital onboarding and sales intelligence platform for Indian MSMEs — collapsing a 14-day fragmented onboarding ordeal into a 3-minute, catalogue-grounded, privacy-first digital experience."
+    p_vp.text = "An AI-powered digital onboarding and sales intelligence platform for Indian MSMEs — collapsing a 17.6-day average fragmented onboarding ordeal into a 3-minute prototype onboarding demonstration, catalogue-grounded, privacy-first digital experience (simulated provisioning)."
     p_vp.font.size = Pt(14)
     p_vp.font.color.rgb = RGBColor(203, 213, 225)
     
@@ -133,7 +133,7 @@ def create_presentation():
     
     add_card(s2, 0.8, 1.6, 3.6, 4.8, "1. Fragmented Buying Journey", [
         "• Multiple Uncoordinated Vendors: A merchant buys broadband from one vendor, POS terminal from another, calling SIMs elsewhere.",
-        "• 56% Drop-Off at Quote: MSMEs experience acute quote shock when hidden fees and disconnected charges are delivered.",
+        "• 56.4% Drop from Needs Assessed to Quote Accepted: MSMEs experience acute quote shock when hidden fees and disconnected charges are delivered.",
         "• Confusing Telecom SKUs: Small business owners do not know whether they need DIA, MPLS, or FWA."
     ])
     add_card(s2, 4.8, 1.6, 3.6, 4.8, "2. High Friction KYC & Compliance", [
@@ -155,10 +155,10 @@ def create_presentation():
 
     steps = [
         ("1. Discover", "Conversational AI Advisor conducts natural dialogue in plain English/Hinglish. Extracts archetype, headcount, budget."),
-        ("2. Recommend", "Deterministic engine maps needs to 25 official products, generating 3 tailored bundles: Essential, Growth, Premium."),
-        ("3. Quote", "100% transparent pricing preview strictly distinguishing Monthly Recurring Charges (MRC) from One-Time Setup fees."),
+        ("2. Recommend", "Deterministic engine maps needs to 25 products from the supplied product catalogue, generating 3 tailored bundles: Essential, Growth, Premium."),
+        ("3. Quote", "Transparent itemized pricing preview strictly distinguishing Monthly Recurring Charges (MRC) from One-Time Setup fees (OTC)."),
         ("4. Verify", "Smart KYC with mandatory DPDP consent, local on-premises OCR, and automated mock GSTIN/Udyam registry lookup."),
-        ("5. Track", "Immediate immutable order generation with step-by-step lifecycle tracking through to simulated service activation.")
+        ("5. Track", "Immediate prototype order reference generation with step-by-step lifecycle tracking through to simulated service activation.")
     ]
     for i, (stitle, sdesc) in enumerate(steps):
         add_card(s3, 0.8 + (i * 2.4), 1.6, 2.2, 4.8, stitle, [sdesc], bg_color=SLATE_LIGHT if i%2==1 else WHITE)
@@ -170,7 +170,7 @@ def create_presentation():
     add_header(s4, "Conversational AI with Deterministic Commercial Trust", "GENAI ADVISOR & EXTRACTION")
 
     add_card(s4, 0.8, 1.6, 5.6, 4.8, "Generative Dialogue vs. Deterministic Pricing", [
-        "• Natural Language Discovery: Powered by Google Gemini (gemini-2.5-flash), the advisor conducts fluid dialogue without forcing users through rigid form drop-downs.",
+        "• Natural Language Discovery: Powered by Google Gemini (gemini-3.1-flash-lite), the advisor conducts fluid dialogue without forcing users through rigid form drop-downs.",
         "• Real-Time Profile Extraction: Dynamically captures business archetype (e.g. Pharmacy, CA Office), location, employee headcount, and monthly telecom budget.",
         "• CRITICAL ARCHITECTURAL BOUNDARY: Gemini NEVER controls product eligibility, catalogue pricing, or bundle scoring.",
         "• Guaranteed Price Integrity: All pricing calculations, bundle compatibility rules, and discounts are 100% deterministic code executed locally on the backend.",
@@ -222,7 +222,7 @@ def create_presentation():
     add_card(s6, 0.8, 1.6, 3.6, 4.8, "1. Modern Frontend (React 18)", [
         "• Vite 5 Single Page Application: Sub-second HMR and instant page rendering.",
         "• Code-Split Production Bundle: Admin portal and charting libraries lazy-loaded via React.lazy & Suspense.",
-        "• Lightweight Customer Bundle: 327 kB gzipped JS bundle for seamless mobile MSME onboarding.",
+        "• Lightweight Initial Customer Payload: ~106 kB gzip (370 kB raw) initial load; admin chunk 109 kB gzip (372 kB raw) code-split.",
         "• Responsive Tailwind CSS: Optimized for desktop sales reps and mobile smartphone merchants.",
         "• 17 Vitest Test Suites: 100% pass rate."
     ])
@@ -230,7 +230,7 @@ def create_presentation():
     add_card(s6, 4.8, 1.6, 3.6, 4.8, "2. High-Speed Backend (FastAPI)", [
         "• Asynchronous ASGI Engine: FastAPI 0.162 on Python 3.13.",
         "• Strict Contract Validation: 100% Pydantic v2 schemas across all API endpoints.",
-        "• Modular Micro-Services: Advisor, Catalogue, Quote, KYC, Orders, and Analytics.",
+        "• Modular FastAPI Backend Services: Advisor, Catalogue, Quote, KYC, Orders, and Analytics.",
         "• Prototype Security Guards: Admin endpoints protected via X-Admin-Role authentication.",
         "• 138 PyTest Test Suites: 100% pass rate."
     ])
@@ -266,7 +266,7 @@ def create_presentation():
         "• Actionable Lead Population: Quarantined 368 already-activated accounts; strictly prioritizes 4,632 unconverted leads.",
         "• Platt Calibrated Brier Score: 0.0666 on held-out test data (beats naive baseline of 0.0680; 68.8% error reduction vs. raw balanced model).",
         "• Held-Out Test ROC-AUC: 0.6692 | PR-AUC: 0.1327",
-        "• 100% Linear Odds Explainability (Mathematically Bounded >= -100%):",
+        "• Interpretable Logistic-Regression Odds Ratios (Mathematically Bounded >= -100%):",
         "  - Referral Source: +165.75% conversion odds (OR: 2.66)",
         "  - GSTIN Compliant: +97.13% conversion odds (OR: 1.97)",
         "  - WhatsApp Campaign: -71.57% conversion odds (OR: 0.28)",
@@ -344,9 +344,9 @@ def create_presentation():
 
     # 3 Summary Cards
     add_card(s10, 1.2, 2.7, 3.4, 3.8, "Unified Customer Journey", [
-        "• 3-Minute Digital Journey",
+        "• 3-Min Prototype Journey (Simulated)",
         "• Conversational AI Advisor",
-        "• Transparent Pricing (MRC/OTC)",
+        "• Itemized Pricing (MRC vs OTC)",
         "• Smart KYC with Local OCR",
         "• Real-Time Order Tracking"
     ], bg_color=WHITE)
@@ -355,7 +355,7 @@ def create_presentation():
         "• 6-Stage Funnel Telemetry",
         "• 4,632 Actionable Leads Scored",
         "• Calibrated Brier Score 0.0666",
-        "• 100% Linear Odds Attribution",
+        "• Interpretable Odds Attribution",
         "• Quarantined Activated Leads"
     ], bg_color=WHITE)
 

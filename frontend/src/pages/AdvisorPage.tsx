@@ -56,9 +56,14 @@ export const AdvisorPage: React.FC = () => {
   // Initialize or resume conversation
   useEffect(() => {
     const initConversation = async () => {
-      if (conversationId) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlConvId = urlParams.get('conv');
+      const activeConvId = urlConvId || conversationId;
+
+      if (activeConvId) {
         try {
-          const state = await advisorApi.getConversation(conversationId);
+          const state = await advisorApi.getConversation(activeConvId);
+          setConversationId(activeConvId);
           setMessages(state.history);
           setProfile(state.profile);
           setMissingFields(state.missing_fields || []);

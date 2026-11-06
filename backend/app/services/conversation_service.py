@@ -25,9 +25,9 @@ class ConversationService:
         # Track asked field names to prevent repeated questioning
         self._asked_fields: Dict[str, List[str]] = {}
 
-    def create_conversation(self) -> ConversationState:
+    def create_conversation(self, conversation_id: Optional[str] = None) -> ConversationState:
         """Create and register a new isolated onboarding conversation session."""
-        conv_id = f"conv_{uuid.uuid4().hex[:12]}"
+        conv_id = conversation_id.strip() if conversation_id else f"conv_{uuid.uuid4().hex[:12]}"
         state = ConversationState(
             conversation_id=conv_id,
             profile=BusinessProfile(),

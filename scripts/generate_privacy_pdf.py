@@ -111,7 +111,7 @@ def generate_pdf():
     col2_content = [
         Paragraph("<b>7. Synthetic Registry Boundary & Limitations</b><br/>All registry checks query local offline mock datasets (<code>mock_gstin_registry.csv</code> and <code>mock_udyam_registry.csv</code>). The prototype connects to no live government GSTN or Ministry portals; validity statuses reflect mock dataset fixtures.", body_style),
         Spacer(1, 3),
-        Paragraph("<b>8. Temporary Local Storage Architecture</b><br/>Uploaded document artifacts are persisted strictly in local temporary application storage (<code>local_uploads/</code>). The prototype does not maintain permanent S3 or Blob vaulting, ensuring uploaded files are easily purged.", body_style),
+        Paragraph("<b>8. Temporary Local Storage Architecture</b><br/>Uploaded document artifacts are persisted strictly in local temporary application storage (<code>backend/storage/kyc_documents/</code>). The prototype does not maintain permanent S3 or Blob vaulting, ensuring uploaded files are easily purged.", body_style),
         Spacer(1, 3),
         Paragraph("<b>9. Prototype Authentication Limitations</b><br/>Administrative analytics endpoints are gated via prototype HTTP header guards (<code>X-Admin-Role: ExecutiveAdmin</code>). Production readiness mandates migration to enterprise OAuth2 / Airtel Active Directory SSO.", body_style),
         Spacer(1, 3),
