@@ -36,8 +36,8 @@ export const LandingPage: React.FC = () => {
   return (
     <div className="relative overflow-hidden">
       {/* Hero Section */}
-      <section className="relative pt-12 pb-20 md:pt-20 md:pb-32 gradient-hero">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative min-h-[85vh] sm:min-h-[88vh] lg:min-h-[92vh] flex flex-col justify-center py-12 sm:py-16 gradient-hero">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto">
           <div className="text-center max-w-3xl mx-auto">
             {/* Tag pill */}
             <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-red-50 border border-red-200/60 text-red-700 text-xs font-semibold mb-6 shadow-xs">
@@ -59,7 +59,7 @@ export const LandingPage: React.FC = () => {
             </p>
 
             {/* CTAs */}
-            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 to="/advisor"
                 className="w-full sm:w-auto px-8 py-3.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-600/30 hover:shadow-xl transition-all flex items-center justify-center space-x-2 text-base"
@@ -106,9 +106,9 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* 4 Key Journey Steps */}
-      <section className="py-20 bg-white border-y border-slate-200">
+      <section className="py-12 md:py-14 bg-white border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-16">
+          <div className="text-center max-w-2xl mx-auto mb-10">
             <h2 className="text-xs font-bold text-red-600 tracking-wider uppercase mb-2">
               Four Seamless Steps
             </h2>
@@ -117,62 +117,70 @@ export const LandingPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Step 1 */}
-            <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 relative hover:shadow-card-hover transition-all">
-              <div className="w-12 h-12 rounded-xl bg-red-100 text-red-600 flex items-center justify-center mb-5 font-bold">
-                <Sparkles className="w-6 h-6" />
+            <div className="bg-gradient-to-b from-rose-50/80 via-white to-white border border-rose-200/90 rounded-2xl p-7 relative hover:shadow-lg hover:border-rose-400 transition-all min-h-[260px] flex flex-col justify-between shadow-2xs group">
+              <div>
+                <div className="w-14 h-14 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center mb-5 font-bold shadow-xs group-hover:scale-105 transition-transform">
+                  <Sparkles className="w-7 h-7" />
+                </div>
+                <span className="text-xs font-bold text-red-600 uppercase tracking-wider">Step 1</span>
+                <h3 className="text-lg font-extrabold text-slate-900 mt-1 mb-2">Understand your business</h3>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Describe your store, clinic, or firm in everyday language. Our GenAI Advisor extracts requirements and maps your eligibility.
+                </p>
               </div>
-              <span className="text-xs font-bold text-red-600 uppercase tracking-wider">Step 1</span>
-              <h3 className="text-lg font-bold text-slate-900 mt-1 mb-2">Understand your business</h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Describe your store, clinic, or firm in everyday language. Our GenAI Advisor extracts requirements and maps your eligibility.
-              </p>
             </div>
 
             {/* Step 2 */}
-            <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 relative hover:shadow-card-hover transition-all">
-              <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-5 font-bold">
-                <Package className="w-6 h-6" />
+            <div className="bg-gradient-to-b from-blue-50/80 via-white to-white border border-blue-200/90 rounded-2xl p-7 relative hover:shadow-lg hover:border-blue-400 transition-all min-h-[260px] flex flex-col justify-between shadow-2xs group">
+              <div>
+                <div className="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-5 font-bold shadow-xs group-hover:scale-105 transition-transform">
+                  <Package className="w-7 h-7" />
+                </div>
+                <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">Step 2</span>
+                <h3 className="text-lg font-extrabold text-slate-900 mt-1 mb-2">Personalized recommendations</h3>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Compare deterministic Essential, Growth, and Premium bundles. Customize add-ons with instant server-authoritative quotes.
+                </p>
               </div>
-              <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">Step 2</span>
-              <h3 className="text-lg font-bold text-slate-900 mt-1 mb-2">Personalized recommendations</h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Compare deterministic Essential, Growth, and Premium bundles. Customize add-ons with instant server-authoritative quotes.
-              </p>
             </div>
 
             {/* Step 3 */}
-            <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 relative hover:shadow-card-hover transition-all">
-              <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-5 font-bold">
-                <ShieldCheck className="w-6 h-6" />
+            <div className="bg-gradient-to-b from-emerald-50/80 via-white to-white border border-emerald-200/90 rounded-2xl p-7 relative hover:shadow-lg hover:border-emerald-400 transition-all min-h-[260px] flex flex-col justify-between shadow-2xs group">
+              <div>
+                <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-5 font-bold shadow-xs group-hover:scale-105 transition-transform">
+                  <ShieldCheck className="w-7 h-7" />
+                </div>
+                <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Step 3</span>
+                <h3 className="text-lg font-extrabold text-slate-900 mt-1 mb-2">Complete digital onboarding</h3>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Consent-first KYC with local document OCR and mock GSTIN/Udyam registry cross-verification with zero cloud PII leakage.
+                </p>
               </div>
-              <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Step 3</span>
-              <h3 className="text-lg font-bold text-slate-900 mt-1 mb-2">Complete digital onboarding</h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Consent-first KYC with local document OCR and mock GSTIN/Udyam registry cross-verification with zero cloud PII leakage.
-              </p>
             </div>
 
             {/* Step 4 */}
-            <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 relative hover:shadow-card-hover transition-all">
-              <div className="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mb-5 font-bold">
-                <Truck className="w-6 h-6" />
+            <div className="bg-gradient-to-b from-purple-50/80 via-white to-white border border-purple-200/90 rounded-2xl p-7 relative hover:shadow-lg hover:border-purple-400 transition-all min-h-[260px] flex flex-col justify-between shadow-2xs group">
+              <div>
+                <div className="w-14 h-14 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center mb-5 font-bold shadow-xs group-hover:scale-105 transition-transform">
+                  <Truck className="w-7 h-7" />
+                </div>
+                <span className="text-xs font-bold text-purple-600 uppercase tracking-wider">Step 4</span>
+                <h3 className="text-lg font-extrabold text-slate-900 mt-1 mb-2">Track your activation</h3>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Receive an authoritative order reference. Follow real-time milestone transitions through field fulfillment to active service.
+                </p>
               </div>
-              <span className="text-xs font-bold text-purple-600 uppercase tracking-wider">Step 4</span>
-              <h3 className="text-lg font-bold text-slate-900 mt-1 mb-2">Track your activation</h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Receive an authoritative order reference. Follow real-time milestone transitions through field fulfillment to active service.
-              </p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Target Segments Feature */}
-      <section className="py-20 bg-slate-50">
+      <section className="py-12 md:py-14 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-16">
+          <div className="text-center max-w-2xl mx-auto mb-10">
             <h2 className="text-xs font-bold text-red-600 tracking-wider uppercase mb-2">
               Tailored For Your Industry
             </h2>
@@ -241,26 +249,6 @@ export const LandingPage: React.FC = () => {
                 </li>
               </ul>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Box */}
-      <section className="py-16 bg-red-600 text-white">
-        <div className="max-w-5xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-            Ready to empower your business?
-          </h2>
-          <p className="mt-4 text-lg text-red-100 max-w-2xl mx-auto">
-            Experience our intelligent GenAI advisor. No technical expertise required.
-          </p>
-          <div className="mt-8 flex justify-center">
-            <Link
-              to="/advisor"
-              className="px-8 py-3.5 bg-white text-red-600 hover:bg-slate-100 font-bold rounded-xl shadow-lg transition-all"
-            >
-              Start Free Assessment
-            </Link>
           </div>
         </div>
       </section>

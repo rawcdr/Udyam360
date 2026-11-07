@@ -1,0 +1,52 @@
+{
+  "advisor_unauth_read_blocked": {
+    "status_code": 401,
+    "blocked": true
+  },
+  "advisor_cross_customer_read_blocked": {
+    "status_code": 403,
+    "blocked": true
+  },
+  "advisor_cross_customer_reset_blocked": {
+    "status_code": 403,
+    "blocked": true
+  },
+  "kyc_cross_customer_read_blocked": {
+    "status_code": 403,
+    "blocked": true
+  },
+  "kyc_pre_consent_upload_blocked": {
+    "status_code": 403,
+    "blocked": true
+  },
+  "kyc_encryption_at_rest_verified": {
+    "is_encrypted_on_disk": true,
+    "decrypted_matches_original": true
+  },
+  "kyc_cross_customer_delete_blocked": {
+    "status_code": 403,
+    "blocked": true
+  },
+  "order_cross_customer_read_blocked": {
+    "status_code": 403,
+    "blocked": true
+  },
+  "order_cross_customer_advance_blocked": {
+    "status_code": 403,
+    "blocked": true
+  },
+  "order_public_tracking_pii_masked": {
+    "phone_masked": true,
+    "email_masked": true,
+    "address_masked": true,
+    "resolved": true
+  },
+  "admin_no_header_blocked": {
+    "status_code": 403,
+    "blocked": true
+  },
+  "admin_valid_header_allowed": {
+    "status_code": 200,
+    "allowed": true
+  }
+}

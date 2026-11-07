@@ -155,23 +155,25 @@ class TestOrderAPIIntegration:
 
         order_id = data["order_id"]
         order_ref = data["order_reference"]
+        token = data.get("session_token") or res.headers.get("x-session-token")
+        headers = {"X-Session-Token": token}
 
-        # Track by reference
+        # Track by reference (public lookup)
         track_res = client.get(f"/api/v1/orders/track/{order_ref}")
         assert track_res.status_code == 200
         assert track_res.json()["order_id"] == order_id
 
-        # Retrieve by id
-        get_res = client.get(f"/api/v1/orders/{order_id}")
+        # Retrieve by id (authenticated)
+        get_res = client.get(f"/api/v1/orders/{order_id}", headers=headers)
         assert get_res.status_code == 200
 
-        # Retrieve timeline
-        tl_res = client.get(f"/api/v1/orders/{order_id}/timeline")
+        # Retrieve timeline (authenticated)
+        tl_res = client.get(f"/api/v1/orders/{order_id}/timeline", headers=headers)
         assert tl_res.status_code == 200
         assert len(tl_res.json()["timeline"]) >= 1
 
-        # Advance order to next state
-        adv_res = client.post(f"/api/v1/orders/{order_id}/advance")
+        # Advance order to next state (authenticated)
+        adv_res = client.post(f"/api/v1/orders/{order_id}/advance", headers=headers)
         assert adv_res.status_code == 200
         assert adv_res.json()["current_state"] == "KYC_PENDING"
 
@@ -195,11 +197,14 @@ class TestOrderAPIIntegration:
         }
         res = client.post("/api/v1/orders", json=payload)
         order_id = res.json()["order_id"]
+        token = res.json().get("session_token") or res.headers.get("x-session-token")
+        headers = {"X-Session-Token": token}
 
-        # Attempt illegal jump to ACTIVATED
+        # Attempt illegal jump to ACTIVATED (authenticated)
         adv_res = client.post(
             f"/api/v1/orders/{order_id}/advance",
             json={"target_state": "ACTIVATED"},
+            headers=headers,
         )
         assert adv_res.status_code == 400
         assert "Invalid order state transition" in adv_res.json()["detail"]

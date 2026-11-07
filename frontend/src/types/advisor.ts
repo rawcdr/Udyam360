@@ -3,15 +3,21 @@
 export interface BusinessProfile {
   business_name?: string | null;
   business_type?: string | null;
+  business_segment?: string | null;
   segment?: string | null;
-  sites_count: number;
+  num_sites?: number;
+  sites_count?: number;
+  employee_count?: number | null;
   num_employees?: number | null;
   city?: string | null;
   city_tier?: number | null;
+  has_gstin?: boolean | null;
   gstin_available?: boolean | null;
+  has_udyam?: boolean | null;
   udyam_available?: boolean | null;
+  monthly_budget_inr?: number | null;
   budget_monthly?: number | null;
-  requested_services: string[];
+  requested_services?: string[];
 }
 
 export interface ChatMessage {

@@ -111,8 +111,13 @@ class KYCStorageService:
         if not str(internal_path).startswith(str(self.storage_dir)):
             raise ValueError("Path traversal attempt detected.")
 
+        # Symmetric encryption at rest via Fernet
+        from app.core.security import get_vault_cipher
+        cipher = get_vault_cipher()
+        encrypted_data = cipher.encrypt(data)
+
         with open(internal_path, "wb") as f:
-            f.write(data)
+            f.write(encrypted_data)
 
         self._doc_index[document_id] = internal_path
         return document_id, internal_path
@@ -122,11 +127,18 @@ class KYCStorageService:
         return self._doc_index.get(document_id)
 
     def read_document_bytes(self, document_id: str) -> Optional[bytes]:
-        """Read document bytes safely."""
+        """Read document bytes safely, decrypting ciphertext on-the-fly."""
         path = self.get_document_path(document_id)
         if path and path.exists():
             with open(path, "rb") as f:
-                return f.read()
+                raw_bytes = f.read()
+            from app.core.security import get_vault_cipher
+            cipher = get_vault_cipher()
+            try:
+                return cipher.decrypt(raw_bytes)
+            except Exception:
+                # Fallback for unencrypted legacy files
+                return raw_bytes
         return None
 
     def delete_case_storage(self, case_id: str) -> int:

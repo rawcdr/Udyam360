@@ -13,6 +13,9 @@ from app.schemas.admin import (
     FeatureImportanceItem,
     FunnelAnalysisResponse,
     GeographicAnalysisResponse,
+    KYCExceptionCase,
+    KYCExceptionResolutionRequest,
+    KYCExceptionResolutionResponse,
     LeadPaginationResponse,
     LeadSourceAnalysisItem,
     ModelInfoResponse,
@@ -25,29 +28,63 @@ from app.schemas.admin import (
     SingleLeadScoreResponse,
 )
 from app.services.analytics_service import analytics_service
+from app.services.kyc_exception_service import kyc_exception_service
 from app.services.lead_scoring_service import lead_scoring_service
 
 router = APIRouter(prefix="/admin", tags=["Executive Admin & ML Analytics"])
 admin_router = router
 
 
+from app.core.security import is_admin_caller, security_manager
+from app.db.database import SessionLocal
+from app.db.models import AdminSession, AdminUser
+from fastapi import Cookie
+
 def verify_admin_access(
     x_admin_role: Optional[str] = Header(
-        default="ExecutiveAdmin",
-        description="Prototype Admin Role header. Valid roles: ExecutiveAdmin, Admin, SalesManager.",
+        default=None,
+        description="Enterprise Admin Role header. Valid roles: ExecutiveAdmin, Admin, SalesManager.",
     ),
+    udyam360_admin_session: Optional[str] = Cookie(None),
+    x_session_token: Optional[str] = Header(None, alias="X-Session-Token"),
+    authorization: Optional[str] = Header(None, alias="Authorization"),
 ) -> str:
-    """Prototype access guard. Enforces admin role header while avoiding hardcoded secrets."""
+    """Enforces administrator authentication via session cookie, token, or legacy header."""
     valid_roles = ["executiveadmin", "admin", "salesmanager"]
-    if not x_admin_role or x_admin_role.strip().lower() not in valid_roles:
+
+    # 1. Check authenticated AdminSession from cookie or token
+    token = udyam360_admin_session or x_session_token
+    if not token and authorization and authorization.startswith("Bearer "):
+        token = authorization[7:].strip()
+
+    if token:
+        sid = security_manager.verify_token(token)
+        if sid:
+            db = SessionLocal()
+            try:
+                sess = db.query(AdminSession).filter(AdminSession.session_id == sid).first()
+                if sess and not sess.is_revoked and sess.role.lower() in valid_roles:
+                    return sess.role
+            finally:
+                db.close()
+
+    # 2. Check X-Admin-Role header (for backward compatibility with Phase 1-5 test suites)
+    if x_admin_role:
+        clean = x_admin_role.strip().lower()
+        if clean in valid_roles:
+            return x_admin_role
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=(
-                "Access Denied: Enterprise Admin role header required. "
-                "Supply 'X-Admin-Role: ExecutiveAdmin' to access internal sales intelligence."
-            ),
+            detail=f"Access Denied: Invalid admin role '{x_admin_role}'.",
         )
-    return x_admin_role
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail=(
+            "Access Denied: Enterprise Admin role or authentication required. "
+            "Please log in via /api/v1/auth/admin/login or supply valid admin credentials."
+        ),
+    )
 
 
 # ==========================================
@@ -293,4 +330,59 @@ def log_sales_action(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Lead '{lead_id}' not found.",
+        )
+
+
+# ==========================================
+# 4. Smart KYC Exception Copilot Endpoints
+# ==========================================
+
+@router.get(
+    "/kyc/exceptions",
+    response_model=List[KYCExceptionCase],
+    summary="Get all flagged Indian MSME KYC exceptions with AI Copilot risk analysis",
+)
+def get_kyc_exceptions(
+    status_filter: Optional[str] = Query(None, alias="status", description="Filter by status (PENDING_REVIEW, APPROVED, REJECTED, ALL)"),
+    _: str = Depends(verify_admin_access),
+):
+    """Retrieves list of active KYC exceptions enriched with LLM verification analysis and registry cross-checks."""
+    return kyc_exception_service.list_exceptions(status=status_filter)
+
+
+@router.get(
+    "/kyc/exceptions/{case_id}",
+    response_model=KYCExceptionCase,
+    summary="Get detailed exception report and registry cross-checks for a specific case",
+)
+def get_kyc_exception_detail(
+    case_id: str = Path(..., description="Unique KYC exception case reference (e.g. KYC-EXP-9042)"),
+    _: str = Depends(verify_admin_access),
+):
+    case = kyc_exception_service.get_exception(case_id)
+    if not case:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"KYC exception case '{case_id}' not found.",
+        )
+    return case
+
+
+@router.post(
+    "/kyc/exceptions/{case_id}/resolve",
+    response_model=KYCExceptionResolutionResponse,
+    summary="Resolve a KYC exception with compliance officer audit trail and order advancement",
+)
+def resolve_kyc_exception(
+    request: KYCExceptionResolutionRequest,
+    case_id: str = Path(..., description="Unique KYC exception case reference"),
+    _: str = Depends(verify_admin_access),
+):
+    """Executes a 1-click regulatory override, advances any attached order to provisioning, and creates an audit record."""
+    try:
+        return kyc_exception_service.resolve_exception(case_id=case_id, request=request)
+    except KeyError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"KYC exception case '{case_id}' not found.",
         )

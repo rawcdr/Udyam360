@@ -46,11 +46,13 @@ Udyam360 targets two core MSME sectors representing **79.12%** of the SMB market
 ## 4. Technology Stack
 
 - **Backend:** Python 3.13.7, FastAPI, Uvicorn, Pydantic v2
+- **Persistence & Security (Phase 7):** SQLite (WAL Mode), SQLAlchemy 2.1+, Bcrypt 5.0+, Cryptography (Fernet AES-128-CBC), Sliding Window Rate Limiting
+- **Authentication (Phase 7):** Passwordless Indian Mobile OTP, HttpOnly Session Cookies, Double-Submit CSRF, Admin RBAC
 - **GenAI / LLM:** Google Gemini Developer API (`google-genai` SDK v2.34.0), utilizing `gemini-3.1-flash-lite` (free-tier preference)
 - **Data & ML:** Pandas, NumPy, Scikit-Learn, OpenPyXL
-- **Testing & Tooling:** PyTest, HTTPX, Pillow, Python-Dotenv, Vitest, React Testing Library
+- **Testing & Tooling:** PyTest (177 backend tests), HTTPX, Pillow, Python-Dotenv, Vitest (20 frontend tests), React Testing Library
 - **Hardware Acceleration:** Windows 11, Intel Core i5-12450H, 16GB RAM, NVIDIA GeForce RTX 3050 Laptop GPU (4GB VRAM)
-- **Frontend (Phase 4):** React 18, TypeScript, Tailwind CSS, Vite 5, React Router v6, Axios, Lucide React
+- **Frontend:** React 18, TypeScript, Tailwind CSS, Vite 5, React Router v6, Axios, Lucide React
 
 ---
 
@@ -398,4 +400,39 @@ python scripts/inspect_dataset.py
 | **Phase 5: Admin & ML Analytics** | **COMPLETED** | Executive Admin Dashboard, 6-stage funnel telemetry, zero-leakage ML pipeline, Logistic Regression lead scoring, sales action logging |
 | **Phase 5.1: ML Metric Corrections** | **COMPLETED** | 4,632 actionable unconverted leads filter, 5-fold Platt Sigmoid calibration (Brier 0.0898), bounded log-odds odds |
 | **Phase 6: Final Review & Submission Packaging** | **COMPLETED** | Code splitting (56.8% bundle reduction), 10-slide pitch deck, 3-min demo script, 1-page privacy note, architecture diagram, 9 live UI screenshots, checklist |
+| **Phase 7: Complete Security & Production Hardening** | **COMPLETED** | Passwordless Indian mobile OTP, HttpOnly session cookies, Double-Submit CSRF, bcrypt Admin RBAC, Fernet document encryption at rest, SQLite WAL persistence (`udyam360.db`), rate limiting, structured audit logging, 177 backend tests passed, 20 frontend tests passed |
+
+---
+
+## 12. Automated Test Verification
+
+Execute the complete end-to-end automated test suites:
+
+### Backend Test Suite (177 tests)
+```powershell
+backend\venv\Scripts\python.exe -m pytest backend\tests
+```
+*Coverage includes:*
+- AI Advisor dialogue, profile extraction & guardrails
+- Catalogue eligibility, bundle recommendations & pricing
+- Local OCR, registry checks, and DPDP consent enforcement
+- Order state machine transitions & tracking
+- Admin analytics, ML lead propensity calibration & scoring
+- Phase 7 Security: Customer OTP, HttpOnly cookies, CSRF protection, Admin RBAC, Fernet encryption, and SQLite persistence (`backend/tests/test_phase_7_security.py`)
+
+### Frontend Test Suite (20 tests)
+```powershell
+npm --prefix frontend test -- --run
+```
+*Coverage includes:*
+- Landing page, Advisor interactive chat, Recommendations, Quote review
+- Smart KYC consent gate & document upload cards
+- Customer mobile OTP modal & Admin executive login portal
+- Order tracking telemetry & timeline progression
+
+### Frontend Production Build
+```powershell
+npm --prefix frontend run build
+```
+Generates production-optimized, code-split assets (`dist/`) in ~6 seconds with zero TypeScript errors.
 

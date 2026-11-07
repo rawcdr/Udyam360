@@ -1,0 +1,84 @@
+{
+  "advisor_idor_read": {
+    "status_code": 200,
+    "pii_exposed": true,
+    "vulnerability": "IDOR: Arbitrary caller can read complete chat history and business profile"
+  },
+  "advisor_idor_reset": {
+    "status_code": 200,
+    "vulnerability": "IDOR: Arbitrary caller can wipe another customer's conversation session"
+  },
+  "kyc_idor_read_case": {
+    "status_code": 200,
+    "case_id_matched": true,
+    "vulnerability": "IDOR: Complete KYC case details accessible without authentication"
+  },
+  "kyc_pre_consent_upload": {
+    "status_code": 201,
+    "allowed_without_consent": true,
+    "document_id": "DOC-0B1EA5702FD6",
+    "vulnerability": "Pre-Consent Document Storage: Files accepted and written to disk before DPDP consent check"
+  },
+  "kyc_idor_list_docs": {
+    "status_code": 200,
+    "count": 1,
+    "vulnerability": "IDOR: List of sensitive uploaded document metadata exposed publicly"
+  },
+  "kyc_unauthenticated_consent": {
+    "status_code": 200,
+    "vulnerability": "Unauthorized Consent Grant: Any party can record or tamper with customer consent records"
+  },
+  "kyc_unauthenticated_process": {
+    "status_code": 200,
+    "vulnerability": "Unauthenticated Pipeline Trigger: Any party can trigger CPU-intensive OCR and validation"
+  },
+  "order_idor_read_by_id": {
+    "status_code": 200,
+    "pii_exposed": true,
+    "vulnerability": "IDOR: Full order including customer phone, email, and address exposed without auth"
+  },
+  "order_public_tracking_exposure": {
+    "status_code": 200,
+    "pii_in_tracking": true,
+    "vulnerability": "Tracking Endpoint Leaks Full PII: Public tracking endpoint exposes customer email, phone, and address"
+  },
+  "order_unauthorized_state_advancement": {
+    "status_code": 200,
+    "new_state": "ORDER_PROCESSING",
+    "vulnerability": "Unauthorized State Machine Advancement: Any party can push order to fulfillment stages"
+  },
+  "admin_default_header_bypass": {
+    "status_code": 200,
+    "bypassed": true,
+    "vulnerability": "Admin Guard Default Header Bypass: Header default='ExecutiveAdmin' grants full unauthenticated access to ML & CRM leads"
+  },
+  "admin_header_spoofing": {
+    "status_code": 200,
+    "vulnerability": "Unsigned Role Header: Client controls role claim with zero cryptographic signature or secret"
+  },
+  "admin_invalid_role_blocked": {
+    "status_code": 403,
+    "blocked": true
+  },
+  "kyc_path_traversal_test": {
+    "status_code": 201,
+    "filename_sanitized": true,
+    "verified": true
+  },
+  "kyc_bad_extension_blocked": {
+    "status_code": 400,
+    "blocked": true
+  },
+  "kyc_magic_bytes_check": {
+    "status_code": 400,
+    "blocked": true
+  },
+  "kyc_encryption_at_rest": {
+    "is_stored_plaintext": true,
+    "vulnerability": "Lack of Encryption at Rest: Document files stored in raw plaintext format on filesystem"
+  },
+  "kyc_unauthenticated_deletion": {
+    "status_code": 200,
+    "vulnerability": "Unauthorized Case Deletion: Any party can delete customer cases and storage"
+  }
+}

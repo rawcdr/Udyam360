@@ -7,7 +7,7 @@ export const ProgressBar: React.FC = () => {
 
   const steps = [
     { id: 1, name: 'AI Advisor', path: '/advisor', icon: Sparkles },
-    { id: 2, name: 'Recommendations', path: '/recommendations', icon: Package },
+    { id: 2, name: 'Bundles & Catalogue', path: '/recommendations', icon: Package },
     { id: 3, name: 'Quote Review', path: '/quote', icon: FileCheck },
     { id: 4, name: 'Smart KYC', path: '/kyc', icon: ShieldCheck },
     { id: 5, name: 'Order Status', path: '/track-order', icon: Truck },

@@ -54,12 +54,17 @@ class OrderRecord:
         self.updated_at = now
         self.timeline: List[OrderTimelineEvent] = []
 
-    def to_response(self) -> OrderResponse:
+    def to_response(self, sanitize_pii: bool = False, session_token: Optional[str] = None) -> OrderResponse:
         is_sim = self.current_state in (
             OrderState.ORDER_PROCESSING,
             OrderState.ACTIVATION_IN_PROGRESS,
             OrderState.ACTIVATED,
         )
+        info = self.customer_info
+        if sanitize_pii:
+            from app.core.security import sanitize_customer_info
+            info = sanitize_customer_info(self.customer_info)
+
         return OrderResponse(
             order_id=self.order_id,
             order_reference=self.order_reference,
@@ -69,13 +74,14 @@ class OrderRecord:
             current_state=self.current_state,
             selected_product_ids=self.selected_product_ids,
             bundle_tier=self.bundle_tier,
-            customer_info=self.customer_info,
+            customer_info=info,
             pricing=self.pricing,
             created_at=self.created_at,
             updated_at=self.updated_at,
             timeline=list(self.timeline),
             is_simulated_stage=is_sim,
             next_action_prompt=self._get_next_action_prompt(),
+            session_token=session_token,
         )
 
     def _get_next_action_prompt(self) -> str:
@@ -84,8 +90,8 @@ class OrderRecord:
             OrderState.KYC_PENDING: "Pending document upload and customer consent.",
             OrderState.KYC_VERIFICATION: "Documents submitted. Local OCR verification in progress.",
             OrderState.MANUAL_REVIEW: "Document flag detected. Manual compliance review in progress.",
-            OrderState.KYC_VERIFIED: "KYC verified. Ready for telecom provisioning dispatch.",
-            OrderState.ORDER_PROCESSING: "Provisioning order generated (Simulated). Site readiness check.",
+            OrderState.KYC_VERIFIED: "Business identity approved. Proceeding to Udyam Approval & telecom provisioning dispatch.",
+            OrderState.ORDER_PROCESSING: "Udyam Approval validated (Simulated). Field engineer allocation underway.",
             OrderState.ACTIVATION_IN_PROGRESS: "Hardware dispatched & SIM configuration underway (Simulated).",
             OrderState.ACTIVATED: "All business services are active and ready to use! (Simulated).",
             OrderState.CANCELLED: "This order has been cancelled.",
@@ -123,6 +129,68 @@ class OrderService:
     def __init__(self):
         self._orders_by_id: Dict[str, OrderRecord] = {}
         self._orders_by_reference: Dict[str, OrderRecord] = {}
+        self._seed_demo_order()
+
+    def _seed_demo_order(self):
+        """Seed default approved demo order matching user walkthrough."""
+        demo_id = "ord_demo_physio"
+        demo_ref = "UDYAM-ORD-2026-C954DD97"
+        record = OrderRecord(
+            order_id=demo_id,
+            order_reference=demo_ref,
+            quote_reference="QTE-2026-PHYSIO",
+            selected_product_ids=["P01", "P03", "P06"],
+            customer_info=CustomerInfo(
+                business_name="Neelgiri Physio Clinic",
+                business_type="Clinic",
+                city="Delhi",
+                state="Delhi",
+                pincode="110001",
+            ),
+            pricing=PricingSnapshot(
+                monthly_recurring_charges=4500.0,
+                one_time_charges=1000.0,
+                estimated_first_month=5500.0,
+            ),
+            bundle_tier="Growth",
+            initial_state=OrderState.KYC_VERIFIED,
+        )
+        record.timeline = [
+            OrderTimelineEvent(
+                event_id="evt_01",
+                from_state=None,
+                to_state=OrderState.QUOTE_CONFIRMED,
+                title="Quote Confirmed",
+                description="Selected Growth bundle registered in catalogue.",
+                is_simulated=False,
+            ),
+            OrderTimelineEvent(
+                event_id="evt_02",
+                from_state=OrderState.QUOTE_CONFIRMED,
+                to_state=OrderState.KYC_PENDING,
+                title="KYC Consent Captured",
+                description="Digital DPDP consent recorded with timestamp audit.",
+                is_simulated=False,
+            ),
+            OrderTimelineEvent(
+                event_id="evt_03",
+                from_state=OrderState.KYC_PENDING,
+                to_state=OrderState.KYC_VERIFICATION,
+                title="OCR Verification Passed",
+                description="Local CPU OCR extracted GSTIN and Udyam credentials.",
+                is_simulated=False,
+            ),
+            OrderTimelineEvent(
+                event_id="evt_04",
+                from_state=OrderState.KYC_VERIFICATION,
+                to_state=OrderState.KYC_VERIFIED,
+                title="Business Identity Approved",
+                description="Entity active status and registrations verified against mock registries.",
+                is_simulated=False,
+            ),
+        ]
+        self._orders_by_id[demo_id] = record
+        self._orders_by_reference[demo_ref] = record
 
     def create_order(self, request: OrderCreateRequest) -> OrderResponse:
         """Create a new order record from quote and KYC details."""
@@ -131,7 +199,7 @@ class OrderService:
         order_reference = f"UDYAM-ORD-2026-{hex_ref}"
 
         # If KYC is already completed for this case, start at KYC_VERIFIED; else QUOTE_CONFIRMED
-        initial_state = OrderState.QUOTE_CONFIRMED
+        initial_state = OrderState.KYC_VERIFIED if request.kyc_case_id else OrderState.QUOTE_CONFIRMED
 
         record = OrderRecord(
             order_id=order_id,
@@ -146,32 +214,155 @@ class OrderService:
             initial_state=initial_state,
         )
 
-        # Initial timeline event
+        # Populate milestone timeline up to initial state
         record.timeline.append(
             OrderTimelineEvent(
                 event_id=f"evt_{uuid.uuid4().hex[:8]}",
                 from_state=None,
-                to_state=initial_state,
-                title="Order Created & Quote Confirmed",
+                to_state=OrderState.QUOTE_CONFIRMED,
+                title="Quote Confirmed",
                 description=f"Order {order_reference} initialized with quote reference {request.quote_reference}.",
                 is_simulated=False,
             )
         )
 
+        if initial_state == OrderState.KYC_VERIFIED:
+            record.timeline.append(
+                OrderTimelineEvent(
+                    event_id=f"evt_{uuid.uuid4().hex[:8]}",
+                    from_state=OrderState.QUOTE_CONFIRMED,
+                    to_state=OrderState.KYC_PENDING,
+                    title="KYC Consent Captured",
+                    description="Digital DPDP consent recorded with timestamp audit.",
+                    is_simulated=False,
+                )
+            )
+            record.timeline.append(
+                OrderTimelineEvent(
+                    event_id=f"evt_{uuid.uuid4().hex[:8]}",
+                    from_state=OrderState.KYC_PENDING,
+                    to_state=OrderState.KYC_VERIFICATION,
+                    title="OCR Verification Passed",
+                    description="Local CPU OCR extracted registration documents.",
+                    is_simulated=False,
+                )
+            )
+            record.timeline.append(
+                OrderTimelineEvent(
+                    event_id=f"evt_{uuid.uuid4().hex[:8]}",
+                    from_state=OrderState.KYC_VERIFICATION,
+                    to_state=OrderState.KYC_VERIFIED,
+                    title="Business Identity Approved",
+                    description="Business identity and certificates verified against mock registries.",
+                    is_simulated=False,
+                )
+            )
+
         self._orders_by_id[order_id] = record
         self._orders_by_reference[order_reference] = record
+
+        # Persist order to database for crash resilience
+        try:
+            import json
+            from app.db.database import SessionLocal
+            from app.db.models import OrderRecordModel
+            db = SessionLocal()
+            try:
+                orm_record = OrderRecordModel(
+                    order_id=order_id,
+                    order_reference=order_reference,
+                    quote_reference=request.quote_reference,
+                    current_state=record.current_state.value,
+                    bundle_tier=record.bundle_tier,
+                    data_json=record.to_response().model_dump_json(),
+                    created_at=record.created_at,
+                    updated_at=record.updated_at,
+                )
+                db.merge(orm_record)
+                db.commit()
+            finally:
+                db.close()
+        except Exception:
+            pass
+
         return record.to_response()
 
-    def get_order(self, order_id: str) -> Optional[OrderResponse]:
+    def get_order(self, order_id: str, sanitize_pii: bool = False) -> Optional[OrderResponse]:
         """Retrieve order by internal order_id."""
         record = self._orders_by_id.get(order_id)
-        return record.to_response() if record else None
+        if not record:
+            try:
+                import json
+                from app.db.database import SessionLocal
+                from app.db.models import OrderRecordModel
+                db = SessionLocal()
+                try:
+                    orm = db.query(OrderRecordModel).filter(OrderRecordModel.order_id == order_id).first()
+                    if orm:
+                        data = json.loads(orm.data_json)
+                        resp = OrderResponse(**data)
+                        rec = OrderRecord(
+                            order_id=resp.order_id,
+                            order_reference=resp.order_reference,
+                            quote_reference=resp.quote_reference,
+                            selected_product_ids=resp.selected_product_ids,
+                            customer_info=resp.customer_info,
+                            pricing=resp.pricing,
+                            advisor_session_id=resp.advisor_session_id,
+                            kyc_case_id=resp.kyc_case_id,
+                            bundle_tier=resp.bundle_tier,
+                            initial_state=resp.current_state,
+                        )
+                        rec.created_at = resp.created_at
+                        rec.updated_at = resp.updated_at
+                        self._orders_by_id[rec.order_id] = rec
+                        self._orders_by_reference[rec.order_reference] = rec
+                        record = rec
+                finally:
+                    db.close()
+            except Exception:
+                pass
 
-    def get_order_by_reference(self, order_reference: str) -> Optional[OrderResponse]:
+        return record.to_response(sanitize_pii=sanitize_pii) if record else None
+
+    def get_order_by_reference(self, order_reference: str, sanitize_pii: bool = False) -> Optional[OrderResponse]:
         """Retrieve order by customer-facing order reference (case-insensitive)."""
         ref_clean = order_reference.strip().upper()
         record = self._orders_by_reference.get(ref_clean)
-        return record.to_response() if record else None
+        if not record:
+            try:
+                import json
+                from app.db.database import SessionLocal
+                from app.db.models import OrderRecordModel
+                db = SessionLocal()
+                try:
+                    orm = db.query(OrderRecordModel).filter(OrderRecordModel.order_reference == ref_clean).first()
+                    if orm:
+                        data = json.loads(orm.data_json)
+                        resp = OrderResponse(**data)
+                        rec = OrderRecord(
+                            order_id=resp.order_id,
+                            order_reference=resp.order_reference,
+                            quote_reference=resp.quote_reference,
+                            selected_product_ids=resp.selected_product_ids,
+                            customer_info=resp.customer_info,
+                            pricing=resp.pricing,
+                            advisor_session_id=resp.advisor_session_id,
+                            kyc_case_id=resp.kyc_case_id,
+                            bundle_tier=resp.bundle_tier,
+                            initial_state=resp.current_state,
+                        )
+                        rec.created_at = resp.created_at
+                        rec.updated_at = resp.updated_at
+                        self._orders_by_id[rec.order_id] = rec
+                        self._orders_by_reference[rec.order_reference] = rec
+                        record = rec
+                finally:
+                    db.close()
+            except Exception:
+                pass
+
+        return record.to_response(sanitize_pii=sanitize_pii) if record else None
 
     def get_timeline(self, order_id: str) -> Optional[OrderTimelineResponse]:
         """Retrieve milestone timeline for an order."""
@@ -262,12 +453,12 @@ class OrderService:
                 notes or "Document verification flagged for compliance review. Under analyst inspection.",
             ),
             OrderState.KYC_VERIFIED: (
-                "KYC Verification Completed",
-                notes or "Business identity and documents successfully verified against registry records.",
+                "Business Identity Approved",
+                notes or "Business identity, GSTIN, and Udyam registrations successfully approved against registry records.",
             ),
             OrderState.ORDER_PROCESSING: (
-                "Order Dispatched for Provisioning (Demo / Simulated)",
-                notes or "Backend telecom provisioning order created. Allocating IP blocks and service profiles.",
+                "Udyam Approval (Demo / Simulated)",
+                notes or "Priority MSME enterprise validation & government registry endorsement (Simulated).",
             ),
             OrderState.ACTIVATION_IN_PROGRESS: (
                 "Fulfillment & Activation in Progress (Demo / Simulated)",

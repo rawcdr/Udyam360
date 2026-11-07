@@ -90,6 +90,7 @@ class OrderResponse(BaseModel):
     timeline: List[OrderTimelineEvent] = Field(default_factory=list)
     is_simulated_stage: bool = False
     next_action_prompt: Optional[str] = None
+    session_token: Optional[str] = Field(default=None, description="Signed customer session token")
 
 
 class OrderTimelineResponse(BaseModel):

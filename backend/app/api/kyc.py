@@ -1,8 +1,14 @@
 """FastAPI router implementing REST endpoints for Udyam360 Smart KYC."""
 
 from typing import List, Optional
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile, status
 
+from app.core.security import (
+    extract_session_token,
+    require_case_access,
+    resolve_or_create_session,
+    security_manager,
+)
 from app.schemas.kyc import (
     ConsentRecord,
     ConsentRequest,
@@ -27,13 +33,21 @@ kyc_router = APIRouter(prefix="/kyc", tags=["Smart KYC & Document Verification"]
     summary="Initialize KYC onboarding application case",
     description="Creates a new KYC application snapshotting validated profile data from an existing advisor session."
 )
-async def create_kyc_case(request: KYCCaseCreateRequest):
+async def create_kyc_case(
+    request: KYCCaseCreateRequest,
+    response: Response,
+    session_token: Optional[str] = Depends(extract_session_token),
+):
     try:
         case = kyc_orchestrator.create_case(
             advisor_session_id=request.advisor_session_id,
             selected_product_ids=request.selected_product_ids,
             quote_reference=request.quote_reference
         )
+        sid, token = resolve_or_create_session(token=session_token, preferred_id=request.advisor_session_id)
+        security_manager.bind_case(sid, case.kyc_case_id)
+        case.session_token = token
+        response.headers["X-Session-Token"] = token
         return case
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
@@ -46,7 +60,10 @@ async def create_kyc_case(request: KYCCaseCreateRequest):
     response_model=KYCCaseResponse,
     summary="Retrieve KYC application details"
 )
-async def get_kyc_case(case_id: str):
+async def get_kyc_case(
+    case_id: str,
+    _: str = Depends(require_case_access),
+):
     case = kyc_orchestrator.get_case(case_id)
     if not case:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"KYC case '{case_id}' not found.")
@@ -59,7 +76,11 @@ async def get_kyc_case(case_id: str):
     summary="Record customer processing consent",
     description="Captures explicit customer consent prior to local OCR processing and mock registry verification."
 )
-async def record_customer_consent(case_id: str, request: ConsentRequest):
+async def record_customer_consent(
+    case_id: str,
+    request: ConsentRequest,
+    _: str = Depends(require_case_access),
+):
     case = kyc_orchestrator.get_case(case_id)
     if not case:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"KYC case '{case_id}' not found.")
@@ -82,11 +103,19 @@ async def record_customer_consent(case_id: str, request: ConsentRequest):
 async def upload_kyc_document(
     case_id: str,
     document_type: DocumentType = Form(...),
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
+    _: str = Depends(require_case_access),
 ):
     case = kyc_orchestrator.get_case(case_id)
     if not case:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"KYC case '{case_id}' not found.")
+
+    # Enforce Customer DPDP Consent Precondition
+    if not kyc_consent_service.is_consent_active(case_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Customer DPDP consent has not been granted for case '{case_id}'. Consent is required prior to document upload."
+        )
 
     file_bytes = await file.read()
     try:
@@ -109,7 +138,10 @@ async def upload_kyc_document(
     response_model=List[KYCDocumentMetadata],
     summary="List uploaded documents for a case"
 )
-async def list_kyc_documents(case_id: str):
+async def list_kyc_documents(
+    case_id: str,
+    _: str = Depends(require_case_access),
+):
     case = kyc_orchestrator.get_case(case_id)
     if not case:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"KYC case '{case_id}' not found.")
@@ -122,7 +154,10 @@ async def list_kyc_documents(case_id: str):
     summary="Execute KYC verification pipeline",
     description="Executes local OCR, field extraction, mock registry lookup, and cross-document verification."
 )
-async def process_kyc_case(case_id: str):
+async def process_kyc_case(
+    case_id: str,
+    _: str = Depends(require_case_access),
+):
     case = kyc_orchestrator.get_case(case_id)
     if not case:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"KYC case '{case_id}' not found.")
@@ -140,7 +175,10 @@ async def process_kyc_case(case_id: str):
     "/cases/{case_id}/status",
     summary="Get high-level KYC status"
 )
-async def get_kyc_status(case_id: str):
+async def get_kyc_status(
+    case_id: str,
+    _: str = Depends(require_case_access),
+):
     case = kyc_orchestrator.get_case(case_id)
     if not case:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"KYC case '{case_id}' not found.")
@@ -162,7 +200,10 @@ async def get_kyc_status(case_id: str):
     response_model=KYCValidationResult,
     summary="Get detailed validation report"
 )
-async def get_validation_details(case_id: str):
+async def get_validation_details(
+    case_id: str,
+    _: str = Depends(require_case_access),
+):
     case = kyc_orchestrator.get_case(case_id)
     if not case:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"KYC case '{case_id}' not found.")
@@ -180,7 +221,10 @@ async def get_validation_details(case_id: str):
     "/cases/{case_id}",
     summary="Delete development KYC case"
 )
-async def delete_kyc_case(case_id: str):
+async def delete_kyc_case(
+    case_id: str,
+    _: str = Depends(require_case_access),
+):
     success = kyc_orchestrator.delete_case(case_id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"KYC case '{case_id}' not found.")

@@ -83,9 +83,35 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, [conversationId]);
 
+  const normalizeProfile = (p: BusinessProfile): BusinessProfile => {
+    const employeeCount = p.employee_count ?? p.num_employees ?? null;
+    const budgetMonthly = p.monthly_budget_inr ?? p.budget_monthly ?? null;
+    const hasGstin = p.has_gstin ?? p.gstin_available ?? true;
+    const hasUdyam = p.has_udyam ?? p.udyam_available ?? true;
+    const numSites = p.num_sites ?? p.sites_count ?? 1;
+    const segment = p.business_segment ?? p.segment ?? null;
+
+    return {
+      ...p,
+      employee_count: employeeCount,
+      num_employees: employeeCount,
+      monthly_budget_inr: budgetMonthly,
+      budget_monthly: budgetMonthly,
+      has_gstin: hasGstin,
+      gstin_available: hasGstin,
+      has_udyam: hasUdyam,
+      udyam_available: hasUdyam,
+      num_sites: numSites,
+      sites_count: numSites,
+      business_segment: segment,
+      segment: segment,
+    };
+  };
+
   const setProfile = (newProfile: BusinessProfile) => {
-    setProfileState(newProfile);
-    sessionStorage.setItem('udyam360_profile', JSON.stringify(newProfile));
+    const normalized = normalizeProfile(newProfile);
+    setProfileState(normalized);
+    sessionStorage.setItem('udyam360_profile', JSON.stringify(normalized));
   };
 
   const recalculateQuote = async (overrideProductIds?: string[]): Promise<QuotePreviewResponse | null> => {
@@ -150,6 +176,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setOrder(null);
     sessionStorage.removeItem('udyam360_conv_id');
     sessionStorage.removeItem('udyam360_profile');
+    sessionStorage.removeItem('udyam360_session_token');
   };
 
   return (

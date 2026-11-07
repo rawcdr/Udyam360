@@ -166,4 +166,5 @@ class KYCCaseResponse(BaseModel):
     consent_recorded: bool = False
     created_at: str
     updated_at: str
+    session_token: Optional[str] = Field(default=None, description="Signed customer session token")
 

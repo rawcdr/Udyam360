@@ -3,7 +3,24 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { KYCPage } from '../pages/KYCPage';
 import { OnboardingProvider } from '../context/OnboardingContext';
+import { AuthProvider } from '../context/AuthContext';
 import { kycApi } from '../api/kyc';
+
+vi.mock('../api/auth', () => ({
+  authApi: {
+    getCurrentCustomer: vi.fn().mockResolvedValue({
+      customer_id: 'CUST-TEST-01',
+      phone_number: '+91******3210',
+      is_active: true,
+      created_at: '2026-11-05T12:00:00Z',
+    }),
+    getCurrentAdmin: vi.fn().mockResolvedValue(null),
+    requestOtp: vi.fn(),
+    verifyOtp: vi.fn(),
+    logoutCustomer: vi.fn(),
+    logoutAdmin: vi.fn(),
+  },
+}));
 
 vi.mock('../api/kyc', () => ({
   kycApi: {
@@ -40,14 +57,20 @@ describe('KYCPage Component & Consent Gate', () => {
     (kycApi.listDocuments as any).mockResolvedValue([]);
   });
 
-  it('enforces explicit consent gate before unlocking document uploads', async () => {
-    render(
-      <OnboardingProvider>
-        <BrowserRouter>
-          <KYCPage />
-        </BrowserRouter>
-      </OnboardingProvider>
+  const renderWithProviders = (ui: React.ReactElement) => {
+    return render(
+      <AuthProvider>
+        <OnboardingProvider>
+          <BrowserRouter>
+            {ui}
+          </BrowserRouter>
+        </OnboardingProvider>
+      </AuthProvider>
     );
+  };
+
+  it('enforces explicit consent gate before unlocking document uploads', async () => {
+    renderWithProviders(<KYCPage />);
 
     await waitFor(() => {
       expect(screen.getByText(/Step 1: Data Privacy & Customer Processing Consent/i)).toBeInTheDocument();
@@ -79,13 +102,7 @@ describe('KYCPage Component & Consent Gate', () => {
   });
 
   it('renders dynamic required document types returned by backend', async () => {
-    render(
-      <OnboardingProvider>
-        <BrowserRouter>
-          <KYCPage />
-        </BrowserRouter>
-      </OnboardingProvider>
-    );
+    renderWithProviders(<KYCPage />);
 
     await waitFor(() => {
       expect(screen.getByText(/GST_CERTIFICATE/i)).toBeInTheDocument();
@@ -125,13 +142,7 @@ describe('KYCPage Component & Consent Gate', () => {
       },
     ]);
 
-    render(
-      <OnboardingProvider>
-        <BrowserRouter>
-          <KYCPage />
-        </BrowserRouter>
-      </OnboardingProvider>
-    );
+    renderWithProviders(<KYCPage />);
 
     await waitFor(() => {
       expect(screen.getByText(/Step 1: Data Privacy & Customer Processing Consent/i)).toBeInTheDocument();
@@ -156,4 +167,3 @@ describe('KYCPage Component & Consent Gate', () => {
     });
   });
 });
-

@@ -4,6 +4,7 @@ import { useOnboarding } from '../context/OnboardingContext';
 import { advisorApi } from '../api/advisor';
 import { recommendationApi } from '../api/recommendations';
 import { ChatMessage } from '../types/advisor';
+import { MarkdownMessage } from '../components/chat/MarkdownMessage';
 import {
   Sparkles,
   Send,
@@ -43,18 +44,35 @@ export const AdvisorPage: React.FC = () => {
   const [recommendationsReady, setRecommendationsReady] = useState<boolean>(false);
   const [isFallbackMode, setIsFallbackMode] = useState<boolean>(false);
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
+  const isInitialMount = useRef<boolean>(true);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
+  // Scroll internal chat container (NEVER window) when messages arrive
   useEffect(() => {
-    scrollToBottom();
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+        window.scrollTo(0, 0);
+      }
+      return;
+    }
+    if (chatScrollRef.current) {
+      if (typeof chatScrollRef.current.scrollTo === 'function') {
+        chatScrollRef.current.scrollTo({
+          top: chatScrollRef.current.scrollHeight,
+          behavior: 'smooth',
+        });
+      } else {
+        chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+      }
+    }
   }, [messages, isLoading]);
 
   // Initialize or resume conversation
   useEffect(() => {
+    if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+      window.scrollTo(0, 0);
+    }
     const initConversation = async () => {
       const urlParams = new URLSearchParams(window.location.search);
       const urlConvId = urlParams.get('conv');
@@ -180,9 +198,9 @@ export const AdvisorPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 pb-3 border-b border-slate-200">
         <div>
           <div className="flex items-center space-x-2">
             <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
@@ -215,9 +233,9 @@ export const AdvisorPage: React.FC = () => {
       {/* Main 2-Panel Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Panel: Conversational Chat (7 cols) */}
-        <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col h-[700px]">
+        <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col h-[560px] lg:h-[600px]">
           {/* Chat Messages Scroll Area */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+          <div ref={chatScrollRef} className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5">
             {messages.map((msg, idx) => {
               const isAssistant = msg.role === 'assistant';
               return (
@@ -244,7 +262,7 @@ export const AdvisorPage: React.FC = () => {
                         : 'bg-red-600 text-white rounded-tr-xs shadow-xs'
                     }`}
                   >
-                    <p className="whitespace-pre-line">{msg.content}</p>
+                    <MarkdownMessage content={msg.content} isAssistant={isAssistant} />
                     <span
                       className={`text-[10px] block mt-1.5 font-medium ${
                         isAssistant ? 'text-slate-400' : 'text-red-200'
@@ -280,8 +298,6 @@ export const AdvisorPage: React.FC = () => {
                 <span>{errorMessage}</span>
               </div>
             )}
-
-            <div ref={messagesEndRef} />
           </div>
 
           {/* Quick Prompt Suggestions */}
@@ -383,7 +399,7 @@ export const AdvisorPage: React.FC = () => {
                   <span>Employees</span>
                 </span>
                 <span className="font-bold text-slate-900">
-                  {profile.num_employees ? `${profile.num_employees} staff` : <span className="text-slate-400 italic">Not set</span>}
+                  {(profile.employee_count ?? profile.num_employees) ? `${profile.employee_count ?? profile.num_employees} staff` : <span className="text-slate-400 italic">Not set</span>}
                 </span>
               </div>
 
@@ -393,7 +409,7 @@ export const AdvisorPage: React.FC = () => {
                   <span>Location</span>
                 </span>
                 <span className="font-bold text-slate-900">
-                  {profile.city ? `${profile.city} (Tier ${profile.city_tier || 1})` : 'Bengaluru (Tier 1)'}
+                  {profile.city ? `${profile.city} (Tier ${profile.city_tier || 1})` : 'Delhi (Tier 1)'}
                 </span>
               </div>
 
@@ -402,8 +418,8 @@ export const AdvisorPage: React.FC = () => {
                   <FileSpreadsheet className="w-3.5 h-3.5 text-slate-400" />
                   <span>GSTIN Status</span>
                 </span>
-                <span className={`font-bold ${profile.gstin_available ? 'text-emerald-600' : 'text-slate-600'}`}>
-                  {profile.gstin_available ? 'Available (GST Registered)' : 'Not available / Exempt'}
+                <span className={`font-bold ${(profile.has_gstin ?? profile.gstin_available) !== false ? 'text-emerald-600' : 'text-slate-600'}`}>
+                  {(profile.has_gstin ?? profile.gstin_available) !== false ? 'Available (GST Registered)' : 'Exempt / Unregistered'}
                 </span>
               </div>
 
@@ -413,7 +429,7 @@ export const AdvisorPage: React.FC = () => {
                   <span>Monthly Budget</span>
                 </span>
                 <span className="font-extrabold text-slate-900 text-sm">
-                  {profile.budget_monthly ? `₹${profile.budget_monthly.toLocaleString()}` : '₹3,000 (Default)'}
+                  {(profile.monthly_budget_inr ?? profile.budget_monthly) ? `₹${(profile.monthly_budget_inr ?? profile.budget_monthly)!.toLocaleString()}` : '₹3,000 (Default)'}
                 </span>
               </div>
 

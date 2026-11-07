@@ -75,6 +75,37 @@ class KYCOrchestrator:
         )
 
         self._cases[case_id] = case_response
+
+        # Persist case in SQLite database
+        try:
+            from app.db.database import SessionLocal
+            from app.db.models import KYCCaseRecord
+            from app.services.audit_service import audit_service
+            db = SessionLocal()
+            try:
+                record = KYCCaseRecord(
+                    case_id=case_id,
+                    advisor_session_id=advisor_session_id,
+                    application_status=case_response.application_status.value,
+                    created_at=now_iso,
+                    updated_at=now_iso,
+                )
+                db.add(record)
+                db.commit()
+
+                audit_service.log_event(
+                    event_type="KYC_CASE_CREATED",
+                    actor_type="CUSTOMER",
+                    outcome="SUCCESS",
+                    resource_type="KYC_CASE",
+                    resource_id=case_id,
+                    details={"advisor_session_id": advisor_session_id},
+                )
+            finally:
+                db.close()
+        except Exception:
+            pass
+
         return case_response
 
     def get_case(self, case_id: str) -> Optional[KYCCaseResponse]:

@@ -117,10 +117,11 @@ class KYCValidationService:
                     requires_gst_by_product = True
                     break
 
-        # Check if customer explicitly claimed to possess GSTIN
-        claimed_has_gst = bool(business_profile_snapshot.get("has_gstin") or business_profile_snapshot.get("claimed_has_gstin"))
+        # In Indian MSME telecom onboarding, GST Registration Certificate is standard unless the customer
+        # explicitly stated they are unregistered/exempt (has_gstin is False) AND no selected product mandates GSTIN.
+        is_explicitly_exempt = (business_profile_snapshot.get("has_gstin") is False) and not requires_gst_by_product
 
-        if requires_gst_by_product or claimed_has_gst:
+        if not is_explicitly_exempt:
             required.append(DocumentType.GST_CERTIFICATE)
 
         # Udyam certificate is standard for Indian MSME verification

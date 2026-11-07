@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOnboarding } from '../context/OnboardingContext';
+import { useAuth } from '../context/AuthContext';
+import { CustomerAuthModal } from '../components/auth/CustomerAuthModal';
 import { kycApi } from '../api/kyc';
 import { orderApi } from '../api/orders';
 import { DocumentType, KYCDocumentMetadata, KYCValidationResult } from '../types/kyc';
 import {
   ShieldCheck,
+  ShieldAlert,
   FileUp,
   CheckCircle2,
   AlertTriangle,
@@ -26,6 +29,8 @@ import {
 
 export const KYCPage: React.FC = () => {
   const navigate = useNavigate();
+  const { customer, isCustomerAuthenticated } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const {
     profile,
     selectedProductIds,
@@ -93,6 +98,10 @@ export const KYCPage: React.FC = () => {
   }, [kycCase]);
 
   const handleGrantConsent = async () => {
+    if (!isCustomerAuthenticated) {
+      setShowAuthModal(true);
+      return;
+    }
     if (!kycCase || !consentGranted) return;
     try {
       await kycApi.recordConsent(kycCase.kyc_case_id, true);
@@ -104,6 +113,10 @@ export const KYCPage: React.FC = () => {
   };
 
   const handleFileUpload = async (docType: DocumentType, file: File) => {
+    if (!isCustomerAuthenticated) {
+      setShowAuthModal(true);
+      return;
+    }
     if (!kycCase) return;
     setIsUploading((prev) => ({ ...prev, [docType]: true }));
     setErrorMessage(null);
@@ -155,15 +168,16 @@ export const KYCPage: React.FC = () => {
         },
       });
 
-      // If KYC was verified, advance order to KYC_VERIFIED
-      if (kycValidation && kycValidation.overall_status === 'VERIFIED') {
-        await orderApi.advance(newOrder.order_id); // to KYC_PENDING
-        await orderApi.advance(newOrder.order_id); // to KYC_VERIFICATION
-        await orderApi.advance(newOrder.order_id); // to KYC_VERIFIED
+      // If order is not yet at KYC_VERIFIED and KYC is verified, advance it
+      let finalOrder = newOrder;
+      if (finalOrder.current_state === 'QUOTE_CONFIRMED' && kycValidation && kycValidation.overall_status === 'VERIFIED') {
+        await orderApi.advance(finalOrder.order_id); // to KYC_PENDING
+        await orderApi.advance(finalOrder.order_id); // to KYC_VERIFICATION
+        finalOrder = await orderApi.advance(finalOrder.order_id); // to KYC_VERIFIED
       }
 
-      setOrder(newOrder);
-      navigate(`/track-order?ref=${newOrder.order_reference}`);
+      setOrder(finalOrder);
+      navigate(`/track-order?ref=${finalOrder.order_reference}`);
     } catch (err: any) {
       setErrorMessage('Failed to place order: ' + err.message);
     } finally {
@@ -202,18 +216,16 @@ export const KYCPage: React.FC = () => {
     return labels[docType] || { title: docType, desc: 'Required compliance document.' };
   };
 
-  const requiredDocTypes: DocumentType[] =
-    kycCase?.required_document_types ||
-    (kycCase as any)?.required_documents || [
-      'GST_CERTIFICATE',
-      'ADDRESS_PROOF',
-      'SIGNATORY_ID',
-    ];
+  // Ensure standard MSME compliance documents (including GST Certificate) are always uploadable
+  const backendDocs: DocumentType[] = kycCase?.required_document_types || [];
+  const requiredDocTypes: DocumentType[] = backendDocs.length > 0
+    ? (backendDocs.includes('GST_CERTIFICATE') ? backendDocs : ['GST_CERTIFICATE', ...backendDocs])
+    : ['GST_CERTIFICATE', 'ADDRESS_PROOF', 'SIGNATORY_ID', 'UDYAM_CERTIFICATE'];
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Title Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-200">
         <div>
           <div className="flex items-center space-x-2">
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
@@ -241,6 +253,61 @@ export const KYCPage: React.FC = () => {
         <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center space-x-2">
           <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
           <span>{errorMessage}</span>
+        </div>
+      )}
+
+      {/* Customer Identity Verification Banner */}
+      {isCustomerAuthenticated ? (
+        <div className="bg-emerald-50/80 border border-emerald-200 rounded-2xl p-4 sm:p-5 mb-8 flex items-center justify-between shadow-xs">
+          <div className="flex items-center space-x-3.5">
+            <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-sm shadow-emerald-600/30">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm font-bold text-emerald-950">Verified MSME Customer</span>
+                <span className="text-[10px] bg-emerald-200/80 text-emerald-900 font-bold px-2 py-0.5 rounded-full">
+                  Authenticated Session
+                </span>
+              </div>
+              <p className="text-xs text-emerald-700 mt-0.5">
+                Mobile: <span className="font-mono font-semibold">{customer?.phone_number}</span> &bull; Account ID: {customer?.customer_id}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowAuthModal(true)}
+            className="text-xs font-semibold text-emerald-800 hover:text-emerald-950 underline px-3 py-1.5"
+          >
+            Switch Account
+          </button>
+        </div>
+      ) : (
+        <div className="bg-amber-50/90 border border-amber-200 rounded-2xl p-4 sm:p-5 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+          <div className="flex items-center space-x-3.5">
+            <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shadow-sm shadow-amber-500/30">
+              <ShieldAlert className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm font-bold text-amber-950">Customer Mobile Verification Required</span>
+                <span className="text-[10px] bg-amber-200 text-amber-900 font-bold px-2 py-0.5 rounded-full">
+                  DPDP Protected
+                </span>
+              </div>
+              <p className="text-xs text-amber-800 mt-0.5">
+                To safeguard registration credentials and link onboarding to your business, please verify your mobile number.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowAuthModal(true)}
+            className="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl shadow-md transition-colors whitespace-nowrap"
+          >
+            Verify Mobile Number (OTP)
+          </button>
         </div>
       )}
 
@@ -531,6 +598,17 @@ export const KYCPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Customer Mobile OTP Verification Modal */}
+      <CustomerAuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={() => {
+          setShowAuthModal(false);
+          setErrorMessage(null);
+        }}
+        advisorSessionId={conversationId || undefined}
+      />
     </div>
   );
 };

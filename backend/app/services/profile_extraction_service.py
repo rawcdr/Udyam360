@@ -56,6 +56,7 @@ CRITICAL RULES:
 7. If the user provides conflicting or ambiguous statements, flag clarification_required = true with a clear reason.
 8. Set business_segment to 'micro' (retail, kirana, salon, pharmacy, shop) or 'prof' (clinic, CA, doctor, coaching, consultancy) if clear, otherwise null.
 9. Return valid JSON adhering to the specified schema.
+10. If the business name is stated (e.g. 'Neelgiri Physio Clinic', 'Apollo Pharmacy', 'Shri Kirana'), extract it into business_name.
 """
 
 
@@ -168,9 +169,24 @@ Extract updated fields and output JSON.
         updated_fields = []
         confidences = {}
 
-        # 1. Employee Count: e.g. "3 employees", "five staff", "10 workers"
+        # 0. Business Name: e.g. "I run Neelgiri Physio Clinic in Delhi", "I have a clinic called Apollo Care Pharmacy"
+        name_match = re.search(
+            r"\b(?:i run|we run|run|shop is|clinic is|firm is|called|named|business is|my business is)\s+([A-Z0-9][A-Za-z0-9\s&'\.\-]+?)(?:\s+(?:in|at|with|near|for|\.|\,|$|\n))",
+            message,
+            re.IGNORECASE,
+        )
+        if name_match:
+            candidate_name = name_match.group(1).strip()
+            if 2 <= len(candidate_name.split()) <= 6 and not candidate_name.lower().startswith(("a ", "an ", "the ")):
+                extracted.business_name = candidate_name.title()
+                updated_fields.append("business_name")
+                confidences["business_name"] = 0.90
+
+        # 1. Employee Count: e.g. "3 employees", "five staff", "team of five", "team of 5", "headcount of 4"
         num_word_map = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10}
         emp_match = re.search(r"(\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s*(employees|staff|workers|people|members)", text)
+        if not emp_match:
+            emp_match = re.search(r"\b(?:team of|headcount of|having)\s*(\d+|one|two|three|four|five|six|seven|eight|nine|ten)\b", text)
         if emp_match:
             raw_val = emp_match.group(1)
             emp_cnt = int(raw_val) if raw_val.isdigit() else num_word_map.get(raw_val, 1)

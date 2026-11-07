@@ -1,7 +1,8 @@
 """FastAPI router for Conversational GenAI Business Advisor endpoints."""
 
-from fastapi import APIRouter, HTTPException, Path
+from fastapi import APIRouter, Depends, HTTPException, Path, Response
 from app.core.config import settings
+from app.core.security import require_conversation_access, resolve_or_create_session, security_manager
 from app.schemas.advisor import (
     AdvisorStartResponse,
     AdvisorMessageRequest,
@@ -16,9 +17,14 @@ router = APIRouter(prefix="/advisor", tags=["GenAI Business Advisor"])
 
 
 @router.post("/start", response_model=AdvisorStartResponse, summary="Start a new onboarding conversation")
-def start_conversation():
-    """Initializes a new isolated onboarding conversation session and returns a welcome greeting."""
-    return advisor_orchestrator.start_conversation()
+def start_conversation(response: Response):
+    """Initializes a new isolated onboarding conversation session and returns a signed session token."""
+    resp = advisor_orchestrator.start_conversation()
+    sid, token = resolve_or_create_session(preferred_id=resp.conversation_id)
+    security_manager.bind_conversation(sid, resp.conversation_id)
+    resp.session_token = token
+    response.headers["X-Session-Token"] = token
+    return resp
 
 
 @router.post("/message", response_model=AdvisorMessageResponse, summary="Send message to the advisor")
@@ -28,8 +34,11 @@ def send_message(request: AdvisorMessageRequest):
 
 
 @router.get("/conversation/{conversation_id}", response_model=ConversationState, summary="Get conversation state")
-def get_conversation(conversation_id: str = Path(..., description="Active conversation identifier")):
-    """Retrieves the current structured business profile and message history for a session."""
+def get_conversation(
+    conversation_id: str = Path(..., description="Active conversation identifier"),
+    _: str = Depends(require_conversation_access),
+):
+    """Retrieves the current structured business profile and message history for an authenticated session."""
     state = conversation_service.get_conversation(conversation_id)
     if not state:
         raise HTTPException(status_code=404, detail=f"Conversation session '{conversation_id}' not found.")
@@ -37,8 +46,11 @@ def get_conversation(conversation_id: str = Path(..., description="Active conver
 
 
 @router.post("/reset/{conversation_id}", summary="Reset conversation session")
-def reset_conversation(conversation_id: str = Path(..., description="Active conversation identifier")):
-    """Resets the conversation state and history back to a clean initial profile."""
+def reset_conversation(
+    conversation_id: str = Path(..., description="Active conversation identifier"),
+    _: str = Depends(require_conversation_access),
+):
+    """Resets the conversation state and history back to a clean initial profile for an authenticated session."""
     success = conversation_service.reset_conversation(conversation_id)
     if not success:
         raise HTTPException(status_code=404, detail=f"Conversation session '{conversation_id}' not found.")

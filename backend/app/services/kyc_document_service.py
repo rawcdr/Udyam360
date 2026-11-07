@@ -60,6 +60,41 @@ class KYCDocumentService:
             self._case_index[case_id] = []
         self._case_index[case_id].append(doc_id)
 
+        # Persist document metadata in SQLite database
+        try:
+            import hashlib
+            from app.db.database import SessionLocal
+            from app.db.models import KYCDocumentRecord
+            from app.services.audit_service import audit_service
+            db = SessionLocal()
+            try:
+                doc_record = KYCDocumentRecord(
+                    doc_id=doc_id,
+                    case_id=case_id,
+                    document_type=document_type.value if hasattr(document_type, "value") else str(document_type),
+                    original_filename=sanitized_name,
+                    storage_path=internal_path,
+                    file_size_bytes=len(file_bytes),
+                    mime_type=mime_type,
+                    sha256_hash=hashlib.sha256(file_bytes).hexdigest(),
+                    uploaded_at=now_iso,
+                )
+                db.add(doc_record)
+                db.commit()
+
+                audit_service.log_event(
+                    event_type="KYC_DOCUMENT_UPLOADED",
+                    actor_type="CUSTOMER",
+                    outcome="SUCCESS",
+                    resource_type="KYC_DOCUMENT",
+                    resource_id=doc_id,
+                    details={"case_id": case_id, "doc_type": str(document_type), "size_bytes": len(file_bytes)},
+                )
+            finally:
+                db.close()
+        except Exception:
+            pass
+
         return metadata
 
     def get_document_metadata(self, document_id: str) -> Optional[KYCDocumentMetadata]:

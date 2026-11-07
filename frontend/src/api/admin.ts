@@ -325,5 +325,77 @@ export const adminApi = {
     );
     return res.data;
   },
+
+  async getKYCExceptions(status?: string): Promise<KYCExceptionCase[]> {
+    const res = await apiClient.get('/admin/kyc/exceptions', {
+      params: status ? { status } : undefined,
+      ...ADMIN_CONFIG,
+    });
+    return res.data;
+  },
+
+  async getKYCExceptionDetail(caseId: string): Promise<KYCExceptionCase> {
+    const res = await apiClient.get(`/admin/kyc/exceptions/${caseId}`, ADMIN_CONFIG);
+    return res.data;
+  },
+
+  async resolveKYCException(
+    caseId: string,
+    action: string,
+    notes: string,
+    officerName?: string
+  ): Promise<KYCExceptionResolution> {
+    const res = await apiClient.post(
+      `/admin/kyc/exceptions/${caseId}/resolve`,
+      {
+        action,
+        notes,
+        officer_name: officerName || 'Senior KYC Compliance Officer',
+      },
+      ADMIN_CONFIG
+    );
+    return res.data;
+  },
 };
+
+export interface KYCExceptionCrossCheck {
+  check_name: string;
+  status: 'MATCH' | 'MINOR_VARIATION' | 'MISMATCH' | string;
+  detail: string;
+}
+
+export interface KYCExceptionCase {
+  case_id: string;
+  customer_name: string;
+  business_name: string;
+  trade_name: string;
+  legal_name: string;
+  city: string;
+  segment: string;
+  risk_level: 'LOW' | 'MEDIUM' | 'HIGH';
+  confidence_score: number;
+  flag_reason: string;
+  status: 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'INFO_REQUESTED';
+  created_at: string;
+  reviewed_at?: string;
+  reviewed_by?: string;
+  review_notes?: string;
+  entity_structure: string;
+  cross_checks: KYCExceptionCrossCheck[];
+  copilot_analysis: string;
+  copilot_recommendation: string;
+  order_reference?: string;
+}
+
+export interface KYCExceptionResolution {
+  case_id: string;
+  status: string;
+  action_taken: string;
+  reviewed_by: string;
+  reviewed_at: string;
+  notes: string;
+  order_reference?: string;
+  order_status?: string;
+}
+
 

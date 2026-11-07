@@ -10,6 +10,7 @@ from app.schemas.recommendation import RecommendationResponse
 class ExtractedProfileData(BaseModel):
     """Normalized structured profile extracted from user dialogue."""
 
+    business_name: Optional[str] = Field(default=None, description="Trade or business name (e.g. Neelgiri Physio Clinic)")
     business_type: Optional[str] = Field(default=None, description="e.g. Pharmacy, Kirana, Clinic, CA Firm")
     business_segment: Optional[str] = Field(default=None, description="micro | prof | multi | mfg")
     employee_count: Optional[int] = Field(default=None, ge=1, description="Total headcount")
@@ -65,6 +66,7 @@ class AdvisorStartResponse(BaseModel):
     conversation_id: str
     welcome_message: str
     suggested_prompts: List[str]
+    session_token: Optional[str] = Field(default=None, description="Signed customer session token")
 
 
 class AdvisorMessageRequest(BaseModel):

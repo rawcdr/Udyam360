@@ -36,6 +36,38 @@ class KYCConsentService:
         )
 
         self._consents[case_id] = record
+
+        # Persist consent audit trail to SQLite database
+        try:
+            from app.db.database import SessionLocal
+            from app.db.models import ConsentAudit
+            from app.services.audit_service import audit_service
+            db = SessionLocal()
+            try:
+                audit = ConsentAudit(
+                    consent_id=consent_id,
+                    case_id=case_id,
+                    consent_type="DPDP_PROCESSING",
+                    consent_granted=consent_granted,
+                    consent_version=consent_version,
+                    timestamp=now_iso,
+                )
+                db.add(audit)
+                db.commit()
+
+                audit_service.log_event(
+                    event_type="KYC_CONSENT_CAPTURED",
+                    actor_type="CUSTOMER",
+                    outcome="SUCCESS" if consent_granted else "DENIED",
+                    resource_type="CONSENT_RECORD",
+                    resource_id=consent_id,
+                    details={"case_id": case_id, "version": consent_version, "granted": consent_granted},
+                )
+            finally:
+                db.close()
+        except Exception:
+            pass
+
         return record
 
     def get_consent(self, case_id: str) -> Optional[ConsentRecord]:

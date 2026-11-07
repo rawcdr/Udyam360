@@ -222,3 +222,53 @@ class SalesActionResponse(BaseModel):
     rep_name: str
     timestamp: str
 
+
+# ==========================================
+# Smart KYC Exception Copilot Schemas
+# ==========================================
+
+class KYCExceptionCrossCheck(BaseModel):
+    check_name: str
+    status: str
+    detail: str
+
+
+class KYCExceptionCase(BaseModel):
+    case_id: str
+    customer_name: str
+    business_name: str
+    trade_name: str
+    legal_name: str
+    city: str
+    segment: str
+    risk_level: str
+    confidence_score: float
+    flag_reason: str
+    status: str
+    created_at: str
+    reviewed_at: Optional[str] = None
+    reviewed_by: Optional[str] = None
+    review_notes: Optional[str] = None
+    entity_structure: str
+    cross_checks: List[KYCExceptionCrossCheck]
+    copilot_analysis: str
+    copilot_recommendation: str
+    order_reference: Optional[str] = None
+
+
+class KYCExceptionResolutionRequest(BaseModel):
+    action: str = Field(..., description="APPROVE, REJECT, REQUEST_REUPLOAD")
+    notes: str = Field(..., min_length=2, description="KYC compliance officer notes")
+    officer_name: Optional[str] = "KYC Operations Officer"
+
+
+class KYCExceptionResolutionResponse(BaseModel):
+    case_id: str
+    status: str
+    action_taken: str
+    reviewed_by: str
+    reviewed_at: str
+    notes: str
+    order_reference: Optional[str] = None
+    order_status: Optional[str] = None
+

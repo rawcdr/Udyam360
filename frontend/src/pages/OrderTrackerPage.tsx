@@ -49,6 +49,10 @@ export const OrderTrackerPage: React.FC = () => {
   useEffect(() => {
     if (initialRef) {
       fetchOrder(initialRef);
+    } else {
+      // Default to the approved demo order so user sees the approved state and milestone history
+      fetchOrder('UDYAM-ORD-2026-C954DD97');
+      setSearchRef('UDYAM-ORD-2026-C954DD97');
     }
   }, [initialRef]);
 
@@ -94,8 +98,8 @@ export const OrderTrackerPage: React.FC = () => {
     },
     {
       state: 'ORDER_PROCESSING',
-      label: 'Provisioning Order',
-      desc: 'Backend allocation of IP, SIM & circuits (Simulated).',
+      label: 'Udyam Approval',
+      desc: 'Priority MSME enterprise validation & government registry endorsement (Simulated).',
     },
     {
       state: 'ACTIVATION_IN_PROGRESS',
@@ -117,9 +121,9 @@ export const OrderTrackerPage: React.FC = () => {
   const currentIdx = order ? getStepIndex(order.current_state) : -1;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Header */}
-      <div className="text-center max-w-2xl mx-auto mb-8">
+      <div className="text-center max-w-2xl mx-auto mb-6">
         <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold mb-3">
           <Truck className="w-3.5 h-3.5 text-red-600" />
           <span>Real-Time Activation Lifecycle</span>
@@ -188,12 +192,14 @@ export const OrderTrackerPage: React.FC = () => {
                     className={`px-3 py-1 rounded-full text-xs font-extrabold uppercase ${
                       order.current_state === 'ACTIVATED'
                         ? 'bg-emerald-100 text-emerald-800'
+                        : order.current_state === 'KYC_VERIFIED'
+                        ? 'bg-emerald-100 text-emerald-800 ring-2 ring-emerald-500/20'
                         : order.current_state === 'MANUAL_REVIEW'
                         ? 'bg-amber-100 text-amber-800'
                         : 'bg-blue-100 text-blue-800'
                     }`}
                   >
-                    {order.current_state.replace(/_/g, ' ')}
+                    {order.current_state === 'KYC_VERIFIED' ? 'APPROVED' : order.current_state.replace(/_/g, ' ')}
                   </span>
                 </div>
                 {order.is_simulated_stage && (
